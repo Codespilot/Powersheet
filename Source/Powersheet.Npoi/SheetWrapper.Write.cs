@@ -1,0 +1,187 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
+
+namespace Nerosoft.Powersheet.Npoi
+{
+    public partial class SheetWrapper
+    {
+        public override async Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+        {
+            return await Task.Run(() =>
+            {
+                var columnsInDataTale = (from DataColumn column in data.Columns select column.ColumnName)
+                                        .Where(name => options.IgnoreNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+                                        .ToList();
+
+                var mappers = new Dictionary<int, SheetColumnMapProfile>();
+
+                var excel = new XSSFWorkbook();
+                var sheet = excel.CreateSheet(sheetName);
+
+                var row = sheet.CreateRow(options.HeaderRowNumber);
+
+                for (var index = 0; index < columnsInDataTale.Count; index++)
+                {
+                    var sheetColumnIndex = options.FirstColumnNumber + index - 1;
+
+                    var name = columnsInDataTale[index];
+
+                    var mapper = options.GetMapProfile(name);
+                    mapper ??= new SheetColumnMapProfile(name, name);
+
+                    row.Cells[sheetColumnIndex].SetCellValue(mapper.ColumnName);
+
+                    mappers.Add(sheetColumnIndex, mapper);
+                }
+
+                static object GetValue(DataRow dataRow, string name)
+                {
+                    return dataRow[name];
+                }
+
+                Write(data.Rows.OfType<DataRow>(), sheet, options, mappers, GetValue);
+
+                var stream = new MemoryStream();
+                excel.Write(stream);
+                return stream;
+            }, cancellationToken);
+        }
+
+        public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+        {
+            return await Task.Run(() =>
+            {
+                var properties = typeof(T).GetProperties();
+
+                var mappers = new Dictionary<int, SheetColumnMapProfile>();
+
+                var excel = new XSSFWorkbook();
+                var sheet = excel.CreateSheet(sheetName);
+
+                var row = sheet.CreateRow(options.HeaderRowNumber);
+
+                var index = 0;
+
+                foreach (var property in properties)
+                {
+                    if (options.IgnoreNames.Contains(property.Name, StringComparer.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    var sheetColumnIndex = options.FirstColumnNumber + index - 1;
+
+                    var name = property.Name;
+                    row.Cells[sheetColumnIndex].SetCellValue(name);
+                    var mapper = options.GetMapProfile(name);
+                    mapper ??= new SheetColumnMapProfile(name, name);
+                    mappers.Add(sheetColumnIndex, mapper);
+
+                    index++;
+                }
+
+                object GetValue(T item, string name)
+                {
+                    return properties.FirstOrDefault(t => t.Name == name)?.GetValue(item);
+                }
+
+                Write(data, sheet, options, mappers, GetValue);
+
+                var stream = new MemoryStream();
+                excel.Write(stream);
+                return stream;
+            }, cancellationToken);
+        }
+
+        public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber = 1, int columnNumber = 1, string sheetName = "", Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default)
+        {
+            return await Task.Run(() =>
+            {
+                var excel = new XSSFWorkbook();
+                var sheet = excel.CreateSheet(sheetName);
+
+                var currentRowNumber = firstRowNumber;
+                foreach (var item in data)
+                {
+                    var row = sheet.CreateRow(currentRowNumber);
+                    var value = valueConvert != null ? valueConvert(item, CultureInfo.CurrentCulture) : item;
+
+                    SetCellValue(row.Cells[columnNumber], value);
+
+                    currentRowNumber++;
+                }
+
+                var stream = new MemoryStream();
+                excel.Write(stream);
+                return stream;
+            }, cancellationToken);
+        }
+
+        protected virtual void Write<T>(IEnumerable<T> data, ISheet sheet, SheetWriteOptions options, Dictionary<int, SheetColumnMapProfile> mappers, Func<T, string, object> valueAction)
+        {
+            var currentRowNumber = options.HeaderRowNumber + 1;
+
+            foreach (var item in data)
+            {
+                var row = sheet.CreateRow(currentRowNumber);
+                foreach (var (columnNumber, mapper) in mappers)
+                {
+                    var sourceValue = valueAction.Invoke(item, mapper.Name);
+                    object cellValue;
+                    if (mapper.ValueConvert != null)
+                    {
+                        cellValue = mapper.ValueConvert(sourceValue, CultureInfo.CurrentCulture);
+                    }
+                    else if (mapper.ValueConverter != null)
+                    {
+                        cellValue = mapper.ValueConverter.Convert(sourceValue, CultureInfo.CurrentCulture);
+                    }
+                    else
+                    {
+                        cellValue = sourceValue;
+                    }
+
+                    SetCellValue(row.Cells[columnNumber], cellValue);
+                }
+
+                currentRowNumber++;
+            }
+        }
+
+        protected virtual void SetCellValue(ICell cell, object value)
+        {
+            switch (value)
+            {
+                case null:
+                    return;
+                case string cellValue:
+                    cell.SetCellValue(cellValue);
+                    break;
+                case int:
+                case long:
+                case decimal:
+                case double:
+                    cell.SetCellValue(value.ToString());
+                    cell.SetCellType(CellType.Numeric);
+                    break;
+                case DateTime cellValue:
+                    cell.SetCellValue(cellValue);
+                    break;
+                case bool cellValue:
+                    cell.SetCellValue(cellValue);
+                    break;
+                default:
+                    cell.SetCellValue(value.ToString());
+                    break;
+            }
+        }
+    }
+}

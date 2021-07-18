@@ -21,5 +21,13 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
-
+  
+  <ItemGroup>
+    <PackageReference Include="NPOI" Version="2.5.3" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Powersheet.Core\Powersheet.Core.csproj" />
+  </ItemGroup>
+  
 </Project>
