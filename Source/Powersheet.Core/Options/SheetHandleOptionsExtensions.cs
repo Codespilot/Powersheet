@@ -56,25 +56,25 @@ namespace Nerosoft.Powersheet
             return options;
         }
 
-        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T>> nameExpression, string columnName)
+        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName)
         {
             var name = ExpressionHelper.GetPropertyName(nameExpression);
             return options.UseMapProfile(name, columnName);
         }
 
-        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T>> nameExpression, string columnName, Func<object, CultureInfo, object> valueConvert)
+        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, Func<object, CultureInfo, object> valueConvert)
         {
             var name = ExpressionHelper.GetPropertyName(nameExpression);
             return options.UseMapProfile(name, columnName, valueConvert);
         }
 
-        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T>> nameExpression, string columnName, ICellValueConverter valueConverter)
+        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, ICellValueConverter valueConverter)
         {
             var name = ExpressionHelper.GetPropertyName(nameExpression);
             return options.UseMapProfile(name, columnName, valueConverter);
         }
 
-        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T>> nameExpression, string columnName, Type valueConverterType)
+        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, Type valueConverterType)
         {
             var name = ExpressionHelper.GetPropertyName(nameExpression);
             return options.UseMapProfile(name, columnName, valueConverterType);

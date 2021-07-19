@@ -19,31 +19,40 @@ namespace Nerosoft.Powersheet
         /// The <see cref="MemberExpression" /> does not represent a property.<br />
         /// Or, the property is static.</exception>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters"), SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        internal static string GetPropertyName<T>(Expression<Func<T>> expression)
+        internal static string GetPropertyName<T>(Expression<Func<T, object>> expression)
         {
             if (expression == null)
             {
                 throw new ArgumentNullException(nameof(expression));
             }
 
-            if (expression.Body is not MemberExpression memberExpression)
+            switch (expression.Body)
             {
-                throw new ArgumentException("The expression is not a member access expression.", nameof(expression));
-            }
+                case MemberExpression memberExpression:
+                    var property = memberExpression.Member as PropertyInfo;
+                    if (property == null)
+                    {
+                        throw new ArgumentException("The member access expression does not access a property.", nameof(expression));
+                    }
 
-            var property = memberExpression.Member as PropertyInfo;
-            if (property == null)
-            {
-                throw new ArgumentException("The member access expression does not access a property.", nameof(expression));
-            }
+                    var getMethod = property.GetMethod;
+                    if (getMethod.IsStatic)
+                    {
+                        throw new ArgumentException("The referenced property is a static property.", nameof(expression));
+                    }
 
-            var getMethod = property.GetMethod;
-            if (getMethod.IsStatic)
-            {
-                throw new ArgumentException("The referenced property is a static property.", nameof(expression));
-            }
+                    return memberExpression.Member.Name;
+                case UnaryExpression unaryExpression:
+                    var operand = unaryExpression.Operand as MemberExpression;
+                    if (operand == null)
+                    {
+                        throw new ArgumentException("The expression is not a member access expression.", nameof(operand));
+                    }
 
-            return memberExpression.Member.Name;
+                    return operand.Member.Name;
+                default:
+                    throw new InvalidOperationException();
+            }
         }
     }
 }

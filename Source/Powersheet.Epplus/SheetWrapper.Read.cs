@@ -6,10 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
+using OfficeOpenXml;
 
-namespace Nerosoft.Powersheet.Npoi
+namespace Nerosoft.Powersheet.Epplus
 {
     public partial class SheetWrapper
     {
@@ -131,30 +130,10 @@ namespace Nerosoft.Powersheet.Npoi
         {
             return await Task.Run(() =>
             {
-                var excel = new XSSFWorkbook(stream);
-                var sheet = excel.GetSheetAt(sheetIndex);
+                var excel = new ExcelPackage(stream);
+                var sheet = excel.Workbook.Worksheets[sheetIndex];
 
-                var result = new List<T>();
-
-                for (var index = firstRowNumber; index < sheet.LastRowNum; index++)
-                {
-                    var row = sheet.GetRow(index);
-
-                    T value;
-
-                    if (valueConvert != null)
-                    {
-                        value = valueConvert(GetCellValue(row.GetCell(columnNumber, MissingCellPolicy.RETURN_NULL_AND_BLANK)), CultureInfo.CurrentCulture);
-                    }
-                    else
-                    {
-                        value = (T) GetCellValue(row.GetCell(columnNumber), typeof(T));
-                    }
-
-                    result.Add(value);
-                }
-
-                return result;
+                return Read(sheet, firstRowNumber, columnNumber, valueConvert);
             }, cancellationToken);
         }
 
@@ -162,34 +141,14 @@ namespace Nerosoft.Powersheet.Npoi
         {
             return await Task.Run(() =>
             {
-                var excel = new XSSFWorkbook(stream);
-                var sheet = excel.GetSheet(sheetName);
+                var excel = new ExcelPackage(stream);
+                var sheet = GetSheet(excel, sheetName);
 
-                var result = new List<T>();
-
-                for (var index = firstRowNumber; index < sheet.LastRowNum; index++)
-                {
-                    var row = sheet.GetRow(index);
-
-                    T value;
-
-                    if (valueConvert != null)
-                    {
-                        value = valueConvert(GetCellValue(row.GetCell(columnNumber, MissingCellPolicy.RETURN_NULL_AND_BLANK)), CultureInfo.CurrentCulture);
-                    }
-                    else
-                    {
-                        value = (T) GetCellValue(row.GetCell(columnNumber), typeof(T));
-                    }
-
-                    result.Add(value);
-                }
-
-                return result;
+                return Read(sheet, firstRowNumber, columnNumber, valueConvert);
             }, cancellationToken);
         }
 
-        protected virtual List<T> Read<T>(ISheet sheet, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction)
+        protected virtual List<T> Read<T>(ExcelWorksheet sheet, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction)
         {
             if (sheet == null)
             {
@@ -204,15 +163,11 @@ namespace Nerosoft.Powersheet.Npoi
 
             var result = new List<T>();
 
-            var headerRowNumber = GetHeaderRowNumber(sheet, options.HeaderRowNumber);
+            var columnCount = sheet.Dimension.Columns;
 
-            var headerRow = sheet.GetRow(headerRowNumber);
-
-            var columnCount = headerRow.Cells.Count;
-
-            for (var index = options.FirstColumnNumber - 1; index < columnCount; index++)
+            for (var index = options.FirstColumnNumber; index <= columnCount; index++)
             {
-                var name = headerRow.GetCell(index)?.StringCellValue;
+                var name = sheet.Cells[options.HeaderRowNumber, index].Text;
                 if (string.IsNullOrWhiteSpace(name) || options.IgnoreColumns.Contains(name, StringComparer.OrdinalIgnoreCase))
                 {
                     continue;
@@ -225,37 +180,23 @@ namespace Nerosoft.Powersheet.Npoi
 
             mapperAction?.Invoke(mappers);
 
-            var firstDataRowNumber = headerRowNumber + 1;
-
-            for (var rowIndex = firstDataRowNumber; rowIndex <= sheet.LastRowNum; rowIndex++)
+            for (var rowNumber = options.HeaderRowNumber + 1; rowNumber <= sheet.Dimension.Rows; rowNumber++)
             {
                 if (result.Count >= options.RowCount)
                 {
                     break;
                 }
 
-                var row = sheet.GetRow(rowIndex);
-
-                if (row == null)
-                {
-                    continue;
-                }
-
-                if (row.Cells.All(t => string.IsNullOrWhiteSpace(GetCellValue(t, typeof(string)) as string)))
-                {
-                    continue;
-                }
-
                 var item = itemAction();
 
-                for (var columnIndex = 0; columnIndex < columnCount; columnIndex++)
+                for (var columnNumber = options.FirstColumnNumber; columnNumber <= columnCount; columnNumber++)
                 {
-                    if (!mappers.TryGetValue(columnIndex, out var mapper))
+                    if (!mappers.TryGetValue(columnNumber, out var mapper))
                     {
                         continue;
                     }
 
-                    var cellValue = GetCellValue(row.GetCell(columnIndex, MissingCellPolicy.RETURN_NULL_AND_BLANK));
+                    var cellValue = sheet.Cells[rowNumber, columnNumber].Value;
                     object value;
                     if (mapper.ValueConvert != null)
                     {
@@ -286,26 +227,60 @@ namespace Nerosoft.Powersheet.Npoi
                 throw new IndexOutOfRangeException("The sheet index could not less than 0.");
             }
 
-            var excel = new XSSFWorkbook(stream);
-            if (sheetIndex >= excel.NumberOfSheets)
+            var excel = new ExcelPackage(stream);
+            if (sheetIndex > excel.Workbook.Worksheets.Count - 1)
             {
-                throw new IndexOutOfRangeException($"The sheet index could not larger than or equals the workbook sheet count ({excel.NumberOfNames}).");
+                throw new IndexOutOfRangeException($"The sheet index could not larger than or equals the workbook sheet count ({excel.Workbook.Worksheets.Count}).");
             }
 
-            var sheet = excel.GetSheetAt(sheetIndex);
+            var sheet = excel.Workbook.Worksheets[sheetIndex];
 
             return Read(sheet, options, mapperAction, itemAction, valueAction);
         }
 
         protected virtual List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName)
         {
-            if (string.IsNullOrWhiteSpace(sheetName))
+            var excel = new ExcelPackage(stream);
+            var sheet = GetSheet(excel, sheetName);
+
+            return Read(sheet, options, mapperAction, itemAction, valueAction);
+        }
+
+        protected virtual List<T> Read<T>(ExcelWorksheet sheet, int firstRowNumber, int columnNumber, Func<object, CultureInfo, T> valueConvert)
+        {
+            if (sheet.Dimension.Columns == 1)
             {
-                throw new ArgumentNullException(nameof(sheetName));
+                columnNumber = sheet.Dimension.Start.Column;
+            }
+            else if (columnNumber < sheet.Dimension.Start.Column || columnNumber > sheet.Dimension.End.Column)
+            {
+                throw new IndexOutOfRangeException($"Column number '{columnNumber}' was not in the valid column number range of {sheet.Dimension.Start.Column}-{sheet.Dimension.End.Column}.");
             }
 
-            var excel = new XSSFWorkbook(stream);
-            ISheet sheet;
+            var result = new List<T>();
+
+            for (var rowNumber = firstRowNumber; rowNumber <= sheet.Dimension.Rows; rowNumber++)
+            {
+                T value;
+
+                if (valueConvert != null)
+                {
+                    value = valueConvert(sheet.Cells[rowNumber, columnNumber].Value, CultureInfo.CurrentCulture);
+                }
+                else
+                {
+                    value = sheet.Cells[rowNumber, columnNumber].GetValue<T>();
+                }
+
+                result.Add(value);
+            }
+
+            return result;
+        }
+
+        private static ExcelWorksheet GetSheet(ExcelPackage excel, string sheetName)
+        {
+            ExcelWorksheet sheet;
             if (!string.IsNullOrWhiteSpace(sheetName))
             {
                 var names = GetSheetNames();
@@ -314,97 +289,22 @@ namespace Nerosoft.Powersheet.Npoi
                     throw new InvalidOperationException($"The workbook does not contains a sheet named '{sheetName}'");
                 }
 
-                sheet = excel.GetSheet(sheetName);
+                sheet = excel.Workbook.Worksheets[sheetName];
             }
             else
             {
-                sheet = excel.GetSheetAt(0);
+                sheet = excel.Workbook.Worksheets[0];
             }
 
-            return Read(sheet, options, mapperAction, itemAction, valueAction);
+            return sheet;
 
             IEnumerable<string> GetSheetNames()
             {
-                for (var index = 0; index < excel.NumberOfSheets; index++)
+                for (var index = 0; index < excel.Workbook.Worksheets.Count; index++)
                 {
-                    yield return excel.GetSheetName(index);
+                    yield return excel.Workbook.Worksheets[index].Name;
                 }
             }
         }
-
-        protected virtual object GetCellValue(ICell cell, Type valueType)
-        {
-            if (cell == null)
-            {
-                return null;
-            }
-
-            var value = GetCellValue(cell);
-
-            if (value == null)
-            {
-                return null;
-            }
-
-            if (valueType == typeof(string))
-            {
-                return value.ToString();
-            }
-
-            if (valueType == typeof(int))
-            {
-                return int.Parse(value.ToString());
-            }
-
-            if (valueType == typeof(long))
-            {
-                return long.Parse(value.ToString());
-            }
-
-            if (valueType == typeof(DateTime))
-            {
-                return DateTime.Parse(value.ToString());
-            }
-
-            if (valueType == typeof(Guid))
-            {
-                return Guid.Parse(value.ToString());
-            }
-
-            return value;
-        }
-
-        protected virtual object GetCellValue(ICell cell)
-        {
-            if (cell == null)
-            {
-                return null;
-            }
-
-            return cell.CellType switch
-            {
-                CellType.String => cell.StringCellValue,
-                CellType.Blank => string.Empty,
-                CellType.Boolean => cell.BooleanCellValue,
-                CellType.Error => cell.ErrorCellValue,
-                CellType.Numeric => GetNumericCellValue(cell),
-                CellType.Formula => string.Empty,
-                CellType.Unknown => cell.StringCellValue,
-                _ => string.Empty
-            };
-        }
-
-        private static object GetNumericCellValue(ICell cell)
-        {
-            var stringValue = cell.ToString();
-            if (stringValue.Contains("-") || stringValue.Contains(":"))
-            {
-                return cell.DateCellValue;
-            }
-
-            return cell.NumericCellValue;
-        }
-
-        
     }
 }

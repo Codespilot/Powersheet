@@ -18,7 +18,7 @@ namespace Nerosoft.Powersheet.Npoi
             return await Task.Run(() =>
             {
                 var columnsInDataTale = (from DataColumn column in data.Columns select column.ColumnName)
-                                        .Where(name => options.IgnoreNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+                                        .Where(name => !options.IgnoreNames.Contains(name, StringComparer.OrdinalIgnoreCase))
                                         .ToList();
 
                 var mappers = new Dictionary<int, SheetColumnMapProfile>();
@@ -26,7 +26,9 @@ namespace Nerosoft.Powersheet.Npoi
                 var excel = new XSSFWorkbook();
                 var sheet = excel.CreateSheet(sheetName);
 
-                var row = sheet.CreateRow(options.HeaderRowNumber);
+                var headerRowNumber = GetHeaderRowNumber(sheet, options.HeaderRowNumber);
+
+                var row = sheet.CreateRow(headerRowNumber);
 
                 for (var index = 0; index < columnsInDataTale.Count; index++)
                 {
@@ -37,7 +39,7 @@ namespace Nerosoft.Powersheet.Npoi
                     var mapper = options.GetMapProfile(name);
                     mapper ??= new SheetColumnMapProfile(name, name);
 
-                    row.Cells[sheetColumnIndex].SetCellValue(mapper.ColumnName);
+                    row.CreateCell(sheetColumnIndex, CellType.String).SetCellValue(mapper.ColumnName);
 
                     mappers.Add(sheetColumnIndex, mapper);
                 }
@@ -50,7 +52,9 @@ namespace Nerosoft.Powersheet.Npoi
                 Write(data.Rows.OfType<DataRow>(), sheet, options, mappers, GetValue);
 
                 var stream = new MemoryStream();
-                excel.Write(stream);
+                excel.Write(stream, true);
+                stream.Position = 0;
+                stream.Seek(0, SeekOrigin.Begin);
                 return stream;
             }, cancellationToken);
         }
@@ -66,7 +70,9 @@ namespace Nerosoft.Powersheet.Npoi
                 var excel = new XSSFWorkbook();
                 var sheet = excel.CreateSheet(sheetName);
 
-                var row = sheet.CreateRow(options.HeaderRowNumber);
+                var headerRowNumber = GetHeaderRowNumber(sheet, options.HeaderRowNumber);
+
+                var row = sheet.CreateRow(headerRowNumber);
 
                 var index = 0;
 
@@ -80,9 +86,9 @@ namespace Nerosoft.Powersheet.Npoi
                     var sheetColumnIndex = options.FirstColumnNumber + index - 1;
 
                     var name = property.Name;
-                    row.Cells[sheetColumnIndex].SetCellValue(name);
                     var mapper = options.GetMapProfile(name);
                     mapper ??= new SheetColumnMapProfile(name, name);
+                    row.CreateCell(sheetColumnIndex, CellType.String).SetCellValue(mapper.ColumnName);
                     mappers.Add(sheetColumnIndex, mapper);
 
                     index++;
@@ -96,7 +102,9 @@ namespace Nerosoft.Powersheet.Npoi
                 Write(data, sheet, options, mappers, GetValue);
 
                 var stream = new MemoryStream();
-                excel.Write(stream);
+                excel.Write(stream, true);
+                stream.Position = 0;
+                stream.Seek(0, SeekOrigin.Begin);
                 return stream;
             }, cancellationToken);
         }
@@ -108,26 +116,30 @@ namespace Nerosoft.Powersheet.Npoi
                 var excel = new XSSFWorkbook();
                 var sheet = excel.CreateSheet(sheetName);
 
-                var currentRowNumber = firstRowNumber;
+                var currentRowNumber = firstRowNumber - 1;
                 foreach (var item in data)
                 {
                     var row = sheet.CreateRow(currentRowNumber);
                     var value = valueConvert != null ? valueConvert(item, CultureInfo.CurrentCulture) : item;
 
-                    SetCellValue(row.Cells[columnNumber], value);
+                    var cell = row.CreateCell(columnNumber - 1);
+
+                    SetCellValue(cell, value);
 
                     currentRowNumber++;
                 }
 
                 var stream = new MemoryStream();
-                excel.Write(stream);
+                excel.Write(stream, true);
+                stream.Position = 0;
+                stream.Seek(0, SeekOrigin.Begin);
                 return stream;
             }, cancellationToken);
         }
 
         protected virtual void Write<T>(IEnumerable<T> data, ISheet sheet, SheetWriteOptions options, Dictionary<int, SheetColumnMapProfile> mappers, Func<T, string, object> valueAction)
         {
-            var currentRowNumber = options.HeaderRowNumber + 1;
+            var currentRowNumber = GetHeaderRowNumber(sheet, options.HeaderRowNumber) + 1;
 
             foreach (var item in data)
             {
@@ -142,14 +154,16 @@ namespace Nerosoft.Powersheet.Npoi
                     }
                     else if (mapper.ValueConverter != null)
                     {
-                        cellValue = mapper.ValueConverter.Convert(sourceValue, CultureInfo.CurrentCulture);
+                        cellValue = mapper.ValueConverter.ConvertBack(sourceValue, CultureInfo.CurrentCulture);
                     }
                     else
                     {
                         cellValue = sourceValue;
                     }
 
-                    SetCellValue(row.Cells[columnNumber], cellValue);
+                    var cell = row.CreateCell(columnNumber);
+
+                    SetCellValue(cell, cellValue);
                 }
 
                 currentRowNumber++;

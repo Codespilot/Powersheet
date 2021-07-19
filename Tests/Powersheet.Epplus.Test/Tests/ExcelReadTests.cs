@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Nerosoft.Powersheet.Npoi.Test
+namespace Nerosoft.Powersheet.Epplus.Test
 {
     public class ExcelReadTests
     {
