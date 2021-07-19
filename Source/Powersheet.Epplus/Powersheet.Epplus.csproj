@@ -6,6 +6,7 @@
     <Authors>damon</Authors>
     <Company>Nerosoft Co., Ltd.</Company>
     <Product>Powersheet</Product>
+    <Version>2021.07.20</Version>
     <Copyright>©2018-2021 Nerosoft. All Rights Reserved.</Copyright>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
