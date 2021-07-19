@@ -9,6 +9,14 @@
     <Version>2021.07.20</Version>
     <Copyright>©2018-2021 Nerosoft. All Rights Reserved.</Copyright>
     <LangVersion>latest</LangVersion>
+    <Title>Powersheet core lib.</Title>
+    <PackageProjectUrl>https://github.com/realzhaorong/Powersheet</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/realzhaorong/Powersheet/master/LICENSE</PackageLicenseUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/realzhaorong/Powersheet/master/Logo.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/realzhaorong/Powersheet</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <Description>Powersheet is a useful toolkit to import/export excel data from/to object collection or datatable.</Description>
+    <PackageTags>Excel, Spreadsheet, NPOI, EPPLUS</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
