@@ -11,8 +11,12 @@ using NPOI.XSSF.UserModel;
 
 namespace Nerosoft.Powersheet.Npoi
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class SheetWrapper
     {
+        /// <inherited/>
         public override async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
@@ -43,6 +47,7 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <inherited/>
         public override async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
@@ -73,6 +78,7 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
         {
             var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
@@ -100,6 +106,7 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
         {
             var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
@@ -127,6 +134,7 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
@@ -148,7 +156,7 @@ namespace Nerosoft.Powersheet.Npoi
                     }
                     else
                     {
-                        value = (T) GetCellValue(row.GetCell(columnNumber), typeof(T));
+                        value = (T)GetCellValue(row.GetCell(columnNumber), typeof(T));
                     }
 
                     result.Add(value);
@@ -158,6 +166,7 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
@@ -179,7 +188,7 @@ namespace Nerosoft.Powersheet.Npoi
                     }
                     else
                     {
-                        value = (T) GetCellValue(row.GetCell(columnNumber), typeof(T));
+                        value = (T)GetCellValue(row.GetCell(columnNumber), typeof(T));
                     }
 
                     result.Add(value);
@@ -189,6 +198,16 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sheet"></param>
+        /// <param name="options"></param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <returns></returns>
         protected virtual List<T> Read<T>(ISheet sheet, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction)
         {
             if (sheet == null)
@@ -279,6 +298,17 @@ namespace Nerosoft.Powersheet.Npoi
             return result;
         }
 
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stream"></param>
+        /// <param name="options"></param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <param name="sheetIndex"></param>
+        /// <returns></returns>
         protected virtual List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, int sheetIndex = 0)
         {
             if (sheetIndex < 0)
@@ -297,6 +327,17 @@ namespace Nerosoft.Powersheet.Npoi
             return Read(sheet, options, mapperAction, itemAction, valueAction);
         }
 
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stream"></param>
+        /// <param name="options"></param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <param name="sheetName"></param>
+        /// <returns></returns>
         protected virtual List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName)
         {
             if (string.IsNullOrWhiteSpace(sheetName))
@@ -332,6 +373,12 @@ namespace Nerosoft.Powersheet.Npoi
             }
         }
 
+        /// <summary>
+        /// 获取单元格值
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="valueType"></param>
+        /// <returns></returns>
         protected virtual object GetCellValue(ICell cell, Type valueType)
         {
             if (cell == null)
@@ -374,6 +421,11 @@ namespace Nerosoft.Powersheet.Npoi
             return value;
         }
 
+        /// <summary>
+        /// 获取单元格值
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
         protected virtual object GetCellValue(ICell cell)
         {
             if (cell == null)
@@ -404,7 +456,5 @@ namespace Nerosoft.Powersheet.Npoi
 
             return cell.NumericCellValue;
         }
-
-        
     }
 }

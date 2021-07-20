@@ -13,8 +13,12 @@ namespace Nerosoft.Powersheet.Npoi
 {
     public partial class SheetWrapper
     {
+        /// <inherited/>
         public override async Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
         {
+            options ??= new SheetWriteOptions();
+            options.Validate();
+
             return await Task.Run(() =>
             {
                 var columnsInDataTale = (from DataColumn column in data.Columns select column.ColumnName)
@@ -59,8 +63,12 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <inherited/>
         public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
         {
+            options ??= new SheetWriteOptions();
+            options.Validate();
+
             return await Task.Run(() =>
             {
                 var properties = typeof(T).GetProperties();
@@ -109,6 +117,7 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <inherited/>
         public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber = 1, int columnNumber = 1, string sheetName = "", Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
@@ -137,6 +146,15 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// 将数据集合写入到表格
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="sheet"></param>
+        /// <param name="options"></param>
+        /// <param name="mappers"></param>
+        /// <param name="valueAction"></param>
         protected virtual void Write<T>(IEnumerable<T> data, ISheet sheet, SheetWriteOptions options, Dictionary<int, SheetColumnMapProfile> mappers, Func<T, string, object> valueAction)
         {
             var currentRowNumber = GetHeaderRowNumber(sheet, options.HeaderRowNumber) + 1;
@@ -170,6 +188,11 @@ namespace Nerosoft.Powersheet.Npoi
             }
         }
 
+        /// <summary>
+        /// 设置单元格值
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="value"></param>
         protected virtual void SetCellValue(ICell cell, object value)
         {
             switch (value)
