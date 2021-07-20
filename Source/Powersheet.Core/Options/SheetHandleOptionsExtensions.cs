@@ -4,82 +4,75 @@ using System.Linq.Expressions;
 
 namespace Nerosoft.Powersheet
 {
+    /// <summary>
+    /// 表格选项扩展
+    /// </summary>
     public static class SheetHandleOptionsExtensions
     {
-        public static SheetHandleOptions UseMapProfile(this SheetHandleOptions options, string name, string columnName)
-        {
-            if (options == null)
-            {
-                throw new NullReferenceException("Options is null.");
-            }
-
-            options.AddMapProfile(name, columnName);
-            return options;
-        }
-
-        public static SheetHandleOptions UseMapProfile(this SheetHandleOptions options, string name, string columnName, Func<object, CultureInfo, object> valueConvert)
-        {
-            if (options == null)
-            {
-                throw new NullReferenceException("Options is null.");
-            }
-
-            options.AddMapProfile(name, columnName, valueConvert);
-            return options;
-        }
-
-        public static SheetHandleOptions UseMapProfile(this SheetHandleOptions options, string name, string columnName, ICellValueConverter valueConverter)
-        {
-            if (options == null)
-            {
-                throw new NullReferenceException("Options is null.");
-            }
-
-            options.AddMapProfile(name, columnName, valueConverter);
-            return options;
-        }
-
-        public static SheetHandleOptions UseMapProfile(this SheetHandleOptions options, string name, string columnName, Type valueConverterType)
-        {
-            if (options == null)
-            {
-                throw new NullReferenceException("Options is null.");
-            }
-
-            if (valueConverterType.IsSubclassOf(typeof(ICellValueConverter)))
-            {
-                throw new InvalidOperationException($"The value converter must implements {nameof(ICellValueConverter)}.");
-            }
-
-            var valueConverter = (ICellValueConverter) Activator.CreateInstance(valueConverterType);
-            options.AddMapProfile(name, columnName, valueConverter);
-            return options;
-        }
-
-        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName)
+        /// <summary>
+        /// 添加映射配置
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="options"></param>
+        /// <param name="nameExpression"></param>
+        /// <param name="columnName"></param>
+        /// <returns></returns>
+        public static SheetHandleOptions AddMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName)
         {
             var name = ExpressionHelper.GetPropertyName(nameExpression);
-            return options.UseMapProfile(name, columnName);
+            return options.AddMapProfile(name, columnName);
         }
 
-        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, Func<object, CultureInfo, object> valueConvert)
+        /// <summary>
+        /// 添加映射配置
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="options"></param>
+        /// <param name="nameExpression"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConvert"></param>
+        /// <returns></returns>
+        public static SheetHandleOptions AddMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, Func<object, CultureInfo, object> valueConvert)
         {
             var name = ExpressionHelper.GetPropertyName(nameExpression);
-            return options.UseMapProfile(name, columnName, valueConvert);
+            return options.AddMapProfile(name, columnName, valueConvert);
         }
 
-        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, ICellValueConverter valueConverter)
+        /// <summary>
+        /// 添加映射配置
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="options"></param>
+        /// <param name="nameExpression"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConverter"></param>
+        /// <returns></returns>
+        public static SheetHandleOptions AddMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, ICellValueConverter valueConverter)
         {
             var name = ExpressionHelper.GetPropertyName(nameExpression);
-            return options.UseMapProfile(name, columnName, valueConverter);
+            return options.AddMapProfile(name, columnName, valueConverter);
         }
 
-        public static SheetHandleOptions UseMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, Type valueConverterType)
+        /// <summary>
+        /// 添加映射配置
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="options"></param>
+        /// <param name="nameExpression"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConverterType"></param>
+        /// <returns></returns>
+        public static SheetHandleOptions AddMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, Type valueConverterType)
         {
             var name = ExpressionHelper.GetPropertyName(nameExpression);
-            return options.UseMapProfile(name, columnName, valueConverterType);
+            return options.AddMapProfile(name, columnName, valueConverterType);
         }
 
+
+        /// <summary>
+        /// 校验选项内容
+        /// </summary>
+        /// <param name="options"></param>
         public static void Validate(this SheetHandleOptions options)
         {
             if (options == null)

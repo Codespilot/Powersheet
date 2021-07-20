@@ -109,9 +109,9 @@ namespace Nerosoft.Powersheet.Npoi.Test
 
             var options = new SheetWriteOptions();
 
-            options.UseMapProfile<Employee>(t => t.Id, "编号")
-                   .UseMapProfile<Employee>(t => t.Name, "姓名")
-                   .UseMapProfile<Employee>(t => t.Gender, "性别", (value, _) =>
+            options.AddMapProfile<Employee>(t => t.Id, "编号")
+                   .AddMapProfile<Employee>(t => t.Name, "姓名")
+                   .AddMapProfile<Employee>(t => t.Gender, "性别", (value, _) =>
                    {
                        return value switch
                        {
@@ -122,10 +122,10 @@ namespace Nerosoft.Powersheet.Npoi.Test
                            _ => ""
                        };
                    })
-                   .UseMapProfile<Employee>(t => t.Age, "年龄")
-                   .UseMapProfile<Employee>(t => t.Birthdate, "出生日期")
-                   .UseMapProfile<Employee>(t => t.Department, "部门")
-                   .UseMapProfile<Employee>(t => t.IsActive, "是否在职", (value, _) => IsActiveValueConvert(value));
+                   .AddMapProfile<Employee>(t => t.Age, "年龄")
+                   .AddMapProfile<Employee>(t => t.Birthdate, "出生日期")
+                   .AddMapProfile<Employee>(t => t.Department, "部门")
+                   .AddMapProfile<Employee>(t => t.IsActive, "是否在职", (value, _) => IsActiveValueConvert(value));
 
             var stream = await _wrapper.WriteAsync(employees, options, "职员表");
             Assert.NotEqual(0, stream.Length);

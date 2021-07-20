@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Nerosoft.Powersheet
 {
+    /// <summary>
+    /// 表格读取配置选项
+    /// </summary>
     public class SheetReadOptions : SheetHandleOptions
     {
         private readonly List<string> _ignoreColumns = new();
@@ -13,6 +16,11 @@ namespace Nerosoft.Powersheet
         /// </summary>
         public IEnumerable<string> IgnoreColumns => _ignoreColumns;
 
+        /// <summary>
+        /// 根据表格列名获取映射配置
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public SheetColumnMapProfile GetMapProfile(string name)
         {
             return Mapping.FirstOrDefault(t => t.ColumnName == name);

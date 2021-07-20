@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Nerosoft.Powersheet
 {
+    /// <summary>
+    /// 表格写入配置选项
+    /// </summary>
     public class SheetWriteOptions : SheetHandleOptions
     {
         private readonly List<string> _ignoreNames = new();
@@ -13,6 +16,11 @@ namespace Nerosoft.Powersheet
         /// </summary>
         public IEnumerable<string> IgnoreNames => _ignoreNames;
 
+        /// <summary>
+        /// 根据对象属性名/DataTable列名获取映射配置
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public SheetColumnMapProfile GetMapProfile(string name)
         {
             return Mapping.FirstOrDefault(t => t.Name == name);
