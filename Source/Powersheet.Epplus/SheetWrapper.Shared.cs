@@ -1,3 +1,5 @@
+using System;
+
 namespace Nerosoft.Powersheet.Epplus
 {
     /// <summary>
@@ -5,6 +7,11 @@ namespace Nerosoft.Powersheet.Epplus
     /// </summary>
     public partial class SheetWrapper : SheetWrapperBase
     {
-        
+        private static readonly Lazy<SheetWrapper> Instance = new();
+
+        /// <summary>
+        /// 获取默认<see cref="ISheetWrapper"/>实例
+        /// </summary>
+        public static ISheetWrapper Default => Instance.Value;
     }
 }
