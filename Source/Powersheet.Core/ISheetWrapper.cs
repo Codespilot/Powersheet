@@ -184,7 +184,7 @@ namespace Nerosoft.Powersheet
         /// <param name="sheetName"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<Stream> WriteAsync<T>(Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default
+        Task<Stream> WriteAsync<T>(Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
             where T : class, new();
 
         /// <summary>
