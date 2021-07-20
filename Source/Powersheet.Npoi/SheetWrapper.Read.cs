@@ -260,11 +260,6 @@ namespace Nerosoft.Powersheet.Npoi
                     continue;
                 }
 
-                if (row.Cells.All(t => string.IsNullOrWhiteSpace(GetCellValue(t, typeof(string)) as string)))
-                {
-                    continue;
-                }
-
                 var item = itemAction();
 
                 for (var columnIndex = 0; columnIndex < columnCount; columnIndex++)
