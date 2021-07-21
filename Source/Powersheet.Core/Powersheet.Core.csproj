@@ -6,7 +6,7 @@
     <Authors>damon</Authors>
     <Company>Nerosoft Co., Ltd.</Company>
     <Product>Powersheet</Product>
-    <Version>2021.07.20</Version>
+    <Version>2021.07.22</Version>
     <Copyright>©2018-2021 Nerosoft. All Rights Reserved.</Copyright>
     <LangVersion>latest</LangVersion>
     <Title>Powersheet core lib.</Title>
@@ -20,10 +20,11 @@
 支持DataTable、List&lt;T&gt;作为数据源。
 支持侵入和非侵入两种字段映射配置方式。</Description>
     <PackageTags>Excel, Spreadsheet, NPOI, EPPLUS</PackageTags>
-    <AssemblyVersion>2021.7.21.0</AssemblyVersion>
-    <FileVersion>2021.7.21.0</FileVersion>
     <PackageReleaseNotes>1. 写入方法添加验证配置；
-2. UseMapProfile改为AddMapProfile.</PackageReleaseNotes>
+2. UseMapProfile改为AddMapProfile；
+3. WriteAsync新增委托方法作为数据源；
+4. 增加Default属性获取默认SheetWrapper实例；
+5. 支持通过SheetColumnMapAttribute配置映射关系；</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
