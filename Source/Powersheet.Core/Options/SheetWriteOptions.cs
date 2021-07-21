@@ -14,7 +14,7 @@ namespace Nerosoft.Powersheet
         /// <summary>
         /// 获取忽略的属性或DataTable列
         /// </summary>
-        public IEnumerable<string> IgnoreNames => _ignoreNames;
+        public override IEnumerable<string> IgnoreNames => _ignoreNames;
 
         /// <summary>
         /// 根据对象属性名/DataTable列名获取映射配置
@@ -30,7 +30,7 @@ namespace Nerosoft.Powersheet
         /// 添加忽略的属性
         /// </summary>
         /// <param name="names"></param>
-        public void IgnoreName(params string[] names)
+        public override void IgnoreName(params string[] names)
         {
             if (names == null || names.Length < 1)
             {

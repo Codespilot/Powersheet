@@ -81,27 +81,19 @@ namespace Nerosoft.Powersheet.Npoi
         /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
         {
+            options ??= new SheetReadOptions();
+
+            options.Validate();
+
+            MergeMapProfile<T>(options);
+
             var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
 
-            void ValueAction(T item, string name, object value)
-            {
-                var property = properties[name];
-                if (property == null || !property.CanWrite || value == null)
-                {
-                    return;
-                }
-
-                if (value.GetType() != property.PropertyType)
-                {
-                    value = Convert.ChangeType(value, property.PropertyType);
-                }
-
-                property.SetValue(item, value);
-            }
+            void SetItemValue(T item, string name, object value) => SetValue(properties, item, name, value);
 
             return await Task.Run(() =>
             {
-                var items = Read(stream, options, null, () => new T(), ValueAction, sheetIndex);
+                var items = Read(stream, options, null, () => new T(), SetItemValue, sheetIndex);
                 return items;
             }, cancellationToken);
         }
@@ -109,27 +101,19 @@ namespace Nerosoft.Powersheet.Npoi
         /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
         {
+            options ??= new SheetReadOptions();
+
+            options.Validate();
+
+            MergeMapProfile<T>(options);
+
             var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
 
-            void ValueAction(T item, string name, object value)
-            {
-                var property = properties[name];
-                if (property == null || !property.CanWrite || value == null)
-                {
-                    return;
-                }
-
-                if (value.GetType() != property.PropertyType)
-                {
-                    value = Convert.ChangeType(value, property.PropertyType);
-                }
-
-                property.SetValue(item, value);
-            }
+            void SetItemValue(T item, string name, object value) => SetValue(properties, item, name, value);
 
             return await Task.Run(() =>
             {
-                var items = Read(stream, options, null, () => new T(), ValueAction, sheetName);
+                var items = Read(stream, options, null, () => new T(), SetItemValue, sheetName);
                 return items;
             }, cancellationToken);
         }
@@ -156,7 +140,7 @@ namespace Nerosoft.Powersheet.Npoi
                     }
                     else
                     {
-                        value = (T)GetCellValue(row.GetCell(columnNumber), typeof(T));
+                        value = (T) GetCellValue(row.GetCell(columnNumber), typeof(T));
                     }
 
                     result.Add(value);
@@ -188,7 +172,7 @@ namespace Nerosoft.Powersheet.Npoi
                     }
                     else
                     {
-                        value = (T)GetCellValue(row.GetCell(columnNumber), typeof(T));
+                        value = (T) GetCellValue(row.GetCell(columnNumber), typeof(T));
                     }
 
                     result.Add(value);
@@ -232,7 +216,7 @@ namespace Nerosoft.Powersheet.Npoi
             for (var index = options.FirstColumnNumber - 1; index < columnCount; index++)
             {
                 var name = headerRow.GetCell(index)?.StringCellValue;
-                if (string.IsNullOrWhiteSpace(name) || options.IgnoreColumns.Contains(name, StringComparer.OrdinalIgnoreCase))
+                if (string.IsNullOrWhiteSpace(name) || options.IgnoreNames.Contains(name, StringComparer.OrdinalIgnoreCase))
                 {
                     continue;
                 }

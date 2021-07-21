@@ -53,4 +53,12 @@ services.AddSingleton<ISheetWrapper, SheetWrapper>();
 builder.RegisterType<SheetWrapper>().As<ISheetWrapper>().SingleInstance();
 ```
 
+如果使用EPPLUS版本的实现，还需要在appsetting.json文件增加一个配置节点
+```json
+"EPPlus": {
+    "ExcelPackage": {
+      "LicenseContext": "NonCommercial"
+    }
+  }
+```
 ### 接口

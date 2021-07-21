@@ -56,17 +56,13 @@ namespace Nerosoft.Powersheet.Npoi.Test
             options.AddMapProfile("Name", "姓名");
             options.AddMapProfile("Gender", "性别", (value, _) =>
             {
-                if (value is string gender)
+                return value switch
                 {
-                    return gender switch
-                    {
-                        "男" => 1,
-                        "女" => 2,
-                        _ => 0
-                    };
-                }
-
-                return value;
+                    null => 0,
+                    "男" => 1,
+                    "女" => 2,
+                    _ => 0
+                };
             });
             options.AddMapProfile("Age", "年龄");
             options.AddMapProfile("Birthdate", "出生日期");
@@ -74,6 +70,32 @@ namespace Nerosoft.Powersheet.Npoi.Test
             options.AddMapProfile("IsActive", "是否在职", (value, _) => IsActiveValueConvert(value));
 
             var result = await _wrapper.ReadToListAsync<Employee>(file, options, 0);
+            Assert.Equal(3, result.Count);
+        }
+        
+        [Fact]
+        public async Task TestReadToListAsync_CN_InvasiveMap()
+        {
+            var file = Path.Combine(AppContext.BaseDirectory, "Samples", "Employees.CN.xlsx");
+
+            var options = new SheetReadOptions();
+
+            options.AddMapProfile("Id", "编号");
+            options.AddMapProfile("Gender", "性别", (value, _) =>
+            {
+                return value switch
+                {
+                    null => 0,
+                    "男" => 1,
+                    "女" => 2,
+                    _ => 0
+                };
+            });
+            options.AddMapProfile("Age", "年龄");
+            options.AddMapProfile("Birthdate", "出生日期");
+            options.AddMapProfile("IsActive", "是否在职", (value, _) => IsActiveValueConvert(value));
+
+            var result = await _wrapper.ReadToListAsync<EmployeeInvasiveMap>(file, options, 0);
             Assert.Equal(3, result.Count);
         }
 
@@ -102,6 +124,25 @@ namespace Nerosoft.Powersheet.Npoi.Test
 
         public DateTime Birthdate { get; set; }
 
+        public string Department { get; set; }
+
+        public bool IsActive { get; set; }
+    }
+    
+    public class EmployeeInvasiveMap
+    {
+        public Guid Id { get; set; }
+
+        [SheetColumnMap("姓名")]
+        public string Name { get; set; }
+
+        public int Gender { get; set; }
+
+        public int Age { get; set; }
+
+        public DateTime Birthdate { get; set; }
+
+        [SheetColumnMap("部门")]
         public string Department { get; set; }
 
         public bool IsActive { get; set; }

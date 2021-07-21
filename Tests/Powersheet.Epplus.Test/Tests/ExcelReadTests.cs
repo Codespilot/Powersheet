@@ -24,17 +24,13 @@ namespace Nerosoft.Powersheet.Epplus.Test
             options.AddMapProfile("Name", "姓名");
             options.AddMapProfile("Gender", "性别", (value, _) =>
             {
-                if (value is string gender)
+                return value switch
                 {
-                    return gender switch
-                    {
-                        "男" => 1,
-                        "女" => 2,
-                        _ => 0
-                    };
-                }
-
-                return value;
+                    null => 0,
+                    "男" => 1,
+                    "女" => 2,
+                    _ => 0
+                };
             });
             options.AddMapProfile("Age", "年龄");
             options.AddMapProfile("Birthdate", "出生日期");

@@ -29,6 +29,17 @@ namespace Nerosoft.Powersheet
         public int? RowCount { get; set; }
 
         /// <summary>
+        /// 获取忽略的项（表格列名或对象属性名）
+        /// </summary>
+        public abstract IEnumerable<string> IgnoreNames { get; }
+
+        /// <summary>
+        /// 添加忽略的项（表格列名或对象属性名）
+        /// </summary>
+        /// <param name="names"></param>
+        public abstract void IgnoreName(params string[] names);
+
+        /// <summary>
         /// 获取列映射配置
         /// </summary>
         public IEnumerable<SheetColumnMapProfile> Mapping => _mapping;
@@ -98,13 +109,7 @@ namespace Nerosoft.Powersheet
         /// <returns></returns>
         public SheetHandleOptions AddMapProfile(string name, string columnName, Type valueConverterType)
         {
-            if (valueConverterType.IsSubclassOf(typeof(ICellValueConverter)))
-            {
-                throw new InvalidOperationException($"The value converter must implements {nameof(ICellValueConverter)}.");
-            }
-
-            var valueConverter = (ICellValueConverter)Activator.CreateInstance(valueConverterType);
-            return AddMapProfile(name, columnName, valueConverter);
+            return AddMapProfile(new SheetColumnMapProfile(name, columnName, valueConverterType));
         }
     }
 }

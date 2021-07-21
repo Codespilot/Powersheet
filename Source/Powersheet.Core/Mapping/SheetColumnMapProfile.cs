@@ -12,7 +12,8 @@ namespace Nerosoft.Powersheet
         /// 初始化一个<see cref="SheetColumnMapProfile"/>实例。
         /// </summary>
         public SheetColumnMapProfile()
-        { }
+        {
+        }
 
         /// <summary>
         /// 初始化一个<see cref="SheetColumnMapProfile"/>实例。
@@ -40,6 +41,7 @@ namespace Nerosoft.Powersheet
             {
                 throw new ArgumentNullException(nameof(columnName));
             }
+
             ColumnName = columnName;
         }
 
@@ -49,7 +51,7 @@ namespace Nerosoft.Powersheet
         /// <param name="name"></param>
         /// <param name="columnName"></param>
         /// <param name="valueConvert"></param>
-        public SheetColumnMapProfile(string name, string columnName, Func<object, CultureInfo, object> valueConvert) 
+        public SheetColumnMapProfile(string name, string columnName, Func<object, CultureInfo, object> valueConvert)
             : this(name, columnName)
         {
             ValueConvert = valueConvert;
@@ -61,9 +63,33 @@ namespace Nerosoft.Powersheet
         /// <param name="name"></param>
         /// <param name="columnName"></param>
         /// <param name="valueConverter"></param>
-        public SheetColumnMapProfile(string name, string columnName, ICellValueConverter valueConverter) 
+        public SheetColumnMapProfile(string name, string columnName, ICellValueConverter valueConverter)
             : this(name, columnName)
         {
+            ValueConverter = valueConverter;
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="SheetColumnMapProfile"/>实例。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConverterType"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public SheetColumnMapProfile(string name, string columnName, Type valueConverterType)
+            : this(name, columnName)
+        {
+            if (valueConverterType == null)
+            {
+                return;
+            }
+
+            if (valueConverterType.IsSubclassOf(typeof(ICellValueConverter)))
+            {
+                throw new InvalidOperationException($"The value converter must implements {nameof(ICellValueConverter)}.");
+            }
+
+            var valueConverter = (ICellValueConverter) Activator.CreateInstance(valueConverterType);
             ValueConverter = valueConverter;
         }
 
