@@ -30,10 +30,66 @@ namespace Nerosoft.Powersheet
         }
 
         /// <inherited/>
-        public abstract Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default);
+        public virtual async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
+        {
+            return await Task.Run(() =>
+            {
+                var table = new DataTable();
+
+                void MapperAction(Dictionary<int, SheetColumnMapProfile> mapper)
+                {
+                    foreach (var item in mapper.Values)
+                    {
+                        table.Columns.Add(item.Name);
+                    }
+                }
+
+                static void ValueAction(DataRow item, string name, object value)
+                {
+                    item[name] = value ?? DBNull.Value;
+                }
+
+                var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheetIndex);
+
+                foreach (var row in rows)
+                {
+                    table.Rows.Add(row);
+                }
+
+                return table;
+            }, cancellationToken);
+        }
 
         /// <inherited/>
-        public abstract Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default);
+        public virtual async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
+        {
+            return await Task.Run(() =>
+            {
+                var table = new DataTable();
+
+                void MapperAction(Dictionary<int, SheetColumnMapProfile> mapper)
+                {
+                    foreach (var item in mapper.Values)
+                    {
+                        table.Columns.Add(item.Name);
+                    }
+                }
+
+                static void ValueAction(DataRow item, string name, object value)
+                {
+                    item[name] = value ?? DBNull.Value;
+                }
+
+                var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheetName);
+
+                foreach (var row in rows)
+                {
+                    table.Rows.Add(row);
+                }
+
+                return table;
+            }, cancellationToken);
+        }
 
         /// <inherited/>
         public virtual async Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
@@ -52,12 +108,46 @@ namespace Nerosoft.Powersheet
         }
 
         /// <inherited/>
-        public abstract Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
-            where T : class, new();
+        public virtual async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
+            where T : class, new()
+        {
+            options ??= new SheetReadOptions();
+
+            options.Validate();
+
+            MergeMapProfile<T>(options);
+
+            var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
+
+            void SetItemValue(T item, string name, object value) => SetValue(properties, item, name, value);
+
+            return await Task.Run(() =>
+            {
+                var items = Read(stream, options, null, () => new T(), SetItemValue, sheetIndex);
+                return items;
+            }, cancellationToken);
+        }
 
         /// <inherited/>
-        public abstract Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
-            where T : class, new();
+        public virtual async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
+            where T : class, new()
+        {
+            options ??= new SheetReadOptions();
+
+            options.Validate();
+
+            MergeMapProfile<T>(options);
+
+            var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
+
+            void SetItemValue(T item, string name, object value) => SetValue(properties, item, name, value);
+
+            return await Task.Run(() =>
+            {
+                var items = Read(stream, options, null, () => new T(), SetItemValue, sheetName);
+                return items;
+            }, cancellationToken);
+        }
 
         /// <inherited/>
         public virtual async Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
@@ -79,6 +169,32 @@ namespace Nerosoft.Powersheet
         /// <inherited/>
         public abstract Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="options"></param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <param name="sheetIndex"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        protected abstract List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, int sheetIndex = 0);
+
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="options"></param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <param name="sheetName"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        protected abstract List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName);
+        
         /// <inherited/>
         public abstract Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
 
