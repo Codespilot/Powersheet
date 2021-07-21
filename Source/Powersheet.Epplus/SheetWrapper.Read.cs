@@ -217,7 +217,7 @@ namespace Nerosoft.Powersheet.Epplus
                 var names = GetSheetNames();
                 if (names.All(t => t.Equals(sheetName)))
                 {
-                    throw new InvalidOperationException($"The workbook does not contains a sheet named '{sheetName}'");
+                    throw new SheetNotFoundException(sheetName, $"The workbook does not contains a sheet named '{sheetName}'");
                 }
 
                 sheet = excel.Workbook.Worksheets[sheetName];

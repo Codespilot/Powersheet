@@ -206,21 +206,17 @@ namespace Nerosoft.Powersheet.Npoi
         /// <summary>
         /// 读取表格内容并按行转换为对象集合
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="stream"></param>
-        /// <param name="options"></param>
+        /// <param name="stream">数据流</param>
+        /// <param name="options">读取配置</param>
         /// <param name="mapperAction"></param>
         /// <param name="itemAction"></param>
         /// <param name="valueAction"></param>
         /// <param name="sheetName"></param>
+        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        /// <exception cref="SheetNotFoundException">指定的表格名称<seealso cref="sheetName"/>不存在时抛出此异常。</exception>
         protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName)
         {
-            if (string.IsNullOrWhiteSpace(sheetName))
-            {
-                throw new ArgumentNullException(nameof(sheetName));
-            }
-
             var excel = new XSSFWorkbook(stream);
             ISheet sheet;
             if (!string.IsNullOrWhiteSpace(sheetName))
@@ -228,7 +224,7 @@ namespace Nerosoft.Powersheet.Npoi
                 var names = GetSheetNames();
                 if (names.All(t => t.Equals(sheetName)))
                 {
-                    throw new InvalidOperationException($"The workbook does not contains a sheet named '{sheetName}'");
+                    throw new SheetNotFoundException(sheetName, $"The workbook does not contains a sheet named '{sheetName}'");
                 }
 
                 sheet = excel.GetSheet(sheetName);

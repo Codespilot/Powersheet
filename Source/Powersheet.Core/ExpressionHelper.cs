@@ -41,8 +41,7 @@ namespace Nerosoft.Powersheet
 
                     return memberExpression.Member.Name;
                 case UnaryExpression unaryExpression:
-                    var operand = unaryExpression.Operand as MemberExpression;
-                    if (operand == null)
+                    if (unaryExpression.Operand is not MemberExpression operand)
                     {
                         throw new ArgumentException("The expression is not a member access expression.", nameof(operand));
                     }
