@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -18,7 +17,6 @@ namespace Nerosoft.Powersheet
         /// Not a <see cref="MemberExpression" /><br />
         /// The <see cref="MemberExpression" /> does not represent a property.<br />
         /// Or, the property is static.</exception>
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters"), SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         internal static string GetPropertyName<T>(Expression<Func<T, object>> expression)
         {
             if (expression == null)
@@ -43,8 +41,7 @@ namespace Nerosoft.Powersheet
 
                     return memberExpression.Member.Name;
                 case UnaryExpression unaryExpression:
-                    var operand = unaryExpression.Operand as MemberExpression;
-                    if (operand == null)
+                    if (unaryExpression.Operand is not MemberExpression operand)
                     {
                         throw new ArgumentException("The expression is not a member access expression.", nameof(operand));
                     }

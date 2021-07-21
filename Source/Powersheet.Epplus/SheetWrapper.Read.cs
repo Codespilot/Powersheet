@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,122 +9,12 @@ using OfficeOpenXml;
 
 namespace Nerosoft.Powersheet.Epplus
 {
+    /// <summary>
+    /// 基于EPPLUS实现表格解析
+    /// </summary>
     public partial class SheetWrapper
     {
-        public override async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
-        {
-            return await Task.Run(() =>
-            {
-                var table = new DataTable();
-
-                void MapperAction(Dictionary<int, SheetColumnMapProfile> mapper)
-                {
-                    foreach (var item in mapper.Values)
-                    {
-                        table.Columns.Add(item.Name);
-                    }
-                }
-
-                static void ValueAction(DataRow item, string name, object value)
-                {
-                    item[name] = value ?? DBNull.Value;
-                }
-
-                var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheetIndex);
-
-                foreach (var row in rows)
-                {
-                    table.Rows.Add(row);
-                }
-
-                return table;
-            }, cancellationToken);
-        }
-
-        public override async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
-        {
-            return await Task.Run(() =>
-            {
-                var table = new DataTable();
-
-                void MapperAction(Dictionary<int, SheetColumnMapProfile> mapper)
-                {
-                    foreach (var item in mapper.Values)
-                    {
-                        table.Columns.Add(item.Name);
-                    }
-                }
-
-                void ValueAction(DataRow item, string name, object value)
-                {
-                    item[name] = value ?? DBNull.Value;
-                }
-
-                var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheetName);
-
-                foreach (var row in rows)
-                {
-                    table.Rows.Add(row);
-                }
-
-                return table;
-            }, cancellationToken);
-        }
-
-        public override async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
-        {
-            var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
-
-            void ValueAction(T item, string name, object value)
-            {
-                var property = properties[name];
-                if (property == null || !property.CanWrite || value == null)
-                {
-                    return;
-                }
-
-                if (value.GetType() != property.PropertyType)
-                {
-                    value = Convert.ChangeType(value, property.PropertyType);
-                }
-
-                property.SetValue(item, value);
-            }
-
-            return await Task.Run(() =>
-            {
-                var items = Read(stream, options, null, () => new T(), ValueAction, sheetIndex);
-                return items;
-            }, cancellationToken);
-        }
-
-        public override async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
-        {
-            var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
-
-            void ValueAction(T item, string name, object value)
-            {
-                var property = properties[name];
-                if (property == null || !property.CanWrite || value == null)
-                {
-                    return;
-                }
-
-                if (value.GetType() != property.PropertyType)
-                {
-                    value = Convert.ChangeType(value, property.PropertyType);
-                }
-
-                property.SetValue(item, value);
-            }
-
-            return await Task.Run(() =>
-            {
-                var items = Read(stream, options, null, () => new T(), ValueAction, sheetName);
-                return items;
-            }, cancellationToken);
-        }
-
+        /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
@@ -137,6 +26,7 @@ namespace Nerosoft.Powersheet.Epplus
             }, cancellationToken);
         }
 
+        /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
@@ -148,6 +38,16 @@ namespace Nerosoft.Powersheet.Epplus
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <typeparam name="T">数据对象类型</typeparam>
+        /// <param name="sheet">表格对象</param>
+        /// <param name="options">配置选项</param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <returns></returns>
         protected virtual List<T> Read<T>(ExcelWorksheet sheet, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction)
         {
             if (sheet == null)
@@ -168,7 +68,7 @@ namespace Nerosoft.Powersheet.Epplus
             for (var index = options.FirstColumnNumber; index <= columnCount; index++)
             {
                 var name = sheet.Cells[options.HeaderRowNumber, index].Text;
-                if (string.IsNullOrWhiteSpace(name) || options.IgnoreColumns.Contains(name, StringComparer.OrdinalIgnoreCase))
+                if (string.IsNullOrWhiteSpace(name) || options.IgnoreNames.Contains(name, StringComparer.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -220,7 +120,18 @@ namespace Nerosoft.Powersheet.Epplus
             return result;
         }
 
-        protected virtual List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, int sheetIndex = 0)
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <typeparam name="T">数据对象类型</typeparam>
+        /// <param name="stream"></param>
+        /// <param name="options"></param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <param name="sheetIndex"></param>
+        /// <returns></returns>
+        protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, int sheetIndex = 0)
         {
             if (sheetIndex < 0)
             {
@@ -238,7 +149,18 @@ namespace Nerosoft.Powersheet.Epplus
             return Read(sheet, options, mapperAction, itemAction, valueAction);
         }
 
-        protected virtual List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName)
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <typeparam name="T">数据对象类型</typeparam>
+        /// <param name="stream"></param>
+        /// <param name="options"></param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <param name="sheetName"></param>
+        /// <returns></returns>
+        protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName)
         {
             var excel = new ExcelPackage(stream);
             var sheet = GetSheet(excel, sheetName);
@@ -246,6 +168,15 @@ namespace Nerosoft.Powersheet.Epplus
             return Read(sheet, options, mapperAction, itemAction, valueAction);
         }
 
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <typeparam name="T">数据对象类型</typeparam>
+        /// <param name="sheet">表格对象</param>
+        /// <param name="firstRowNumber"></param>
+        /// <param name="columnNumber"></param>
+        /// <param name="valueConvert"></param>
+        /// <returns></returns>
         protected virtual List<T> Read<T>(ExcelWorksheet sheet, int firstRowNumber, int columnNumber, Func<object, CultureInfo, T> valueConvert)
         {
             if (sheet.Dimension.Columns == 1)
@@ -286,7 +217,7 @@ namespace Nerosoft.Powersheet.Epplus
                 var names = GetSheetNames();
                 if (names.All(t => t.Equals(sheetName)))
                 {
-                    throw new InvalidOperationException($"The workbook does not contains a sheet named '{sheetName}'");
+                    throw new SheetNotFoundException(sheetName, $"The workbook does not contains a sheet named '{sheetName}'");
                 }
 
                 sheet = excel.Workbook.Worksheets[sheetName];

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,122 +10,12 @@ using NPOI.XSSF.UserModel;
 
 namespace Nerosoft.Powersheet.Npoi
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public partial class SheetWrapper
     {
-        public override async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
-        {
-            return await Task.Run(() =>
-            {
-                var table = new DataTable();
-
-                void MapperAction(Dictionary<int, SheetColumnMapProfile> mapper)
-                {
-                    foreach (var item in mapper.Values)
-                    {
-                        table.Columns.Add(item.Name);
-                    }
-                }
-
-                static void ValueAction(DataRow item, string name, object value)
-                {
-                    item[name] = value ?? DBNull.Value;
-                }
-
-                var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheetIndex);
-
-                foreach (var row in rows)
-                {
-                    table.Rows.Add(row);
-                }
-
-                return table;
-            }, cancellationToken);
-        }
-
-        public override async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
-        {
-            return await Task.Run(() =>
-            {
-                var table = new DataTable();
-
-                void MapperAction(Dictionary<int, SheetColumnMapProfile> mapper)
-                {
-                    foreach (var item in mapper.Values)
-                    {
-                        table.Columns.Add(item.Name);
-                    }
-                }
-
-                void ValueAction(DataRow item, string name, object value)
-                {
-                    item[name] = value ?? DBNull.Value;
-                }
-
-                var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheetName);
-
-                foreach (var row in rows)
-                {
-                    table.Rows.Add(row);
-                }
-
-                return table;
-            }, cancellationToken);
-        }
-
-        public override async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
-        {
-            var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
-
-            void ValueAction(T item, string name, object value)
-            {
-                var property = properties[name];
-                if (property == null || !property.CanWrite || value == null)
-                {
-                    return;
-                }
-
-                if (value.GetType() != property.PropertyType)
-                {
-                    value = Convert.ChangeType(value, property.PropertyType);
-                }
-
-                property.SetValue(item, value);
-            }
-
-            return await Task.Run(() =>
-            {
-                var items = Read(stream, options, null, () => new T(), ValueAction, sheetIndex);
-                return items;
-            }, cancellationToken);
-        }
-
-        public override async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
-        {
-            var properties = typeof(T).GetProperties().ToDictionary(t => t.Name, t => t);
-
-            void ValueAction(T item, string name, object value)
-            {
-                var property = properties[name];
-                if (property == null || !property.CanWrite || value == null)
-                {
-                    return;
-                }
-
-                if (value.GetType() != property.PropertyType)
-                {
-                    value = Convert.ChangeType(value, property.PropertyType);
-                }
-
-                property.SetValue(item, value);
-            }
-
-            return await Task.Run(() =>
-            {
-                var items = Read(stream, options, null, () => new T(), ValueAction, sheetName);
-                return items;
-            }, cancellationToken);
-        }
-
+        /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
@@ -158,6 +47,7 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <inherited/>
         public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
@@ -189,6 +79,16 @@ namespace Nerosoft.Powersheet.Npoi
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sheet"></param>
+        /// <param name="options"></param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <returns></returns>
         protected virtual List<T> Read<T>(ISheet sheet, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction)
         {
             if (sheet == null)
@@ -213,7 +113,7 @@ namespace Nerosoft.Powersheet.Npoi
             for (var index = options.FirstColumnNumber - 1; index < columnCount; index++)
             {
                 var name = headerRow.GetCell(index)?.StringCellValue;
-                if (string.IsNullOrWhiteSpace(name) || options.IgnoreColumns.Contains(name, StringComparer.OrdinalIgnoreCase))
+                if (string.IsNullOrWhiteSpace(name) || options.IgnoreNames.Contains(name, StringComparer.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -237,11 +137,6 @@ namespace Nerosoft.Powersheet.Npoi
                 var row = sheet.GetRow(rowIndex);
 
                 if (row == null)
-                {
-                    continue;
-                }
-
-                if (row.Cells.All(t => string.IsNullOrWhiteSpace(GetCellValue(t, typeof(string)) as string)))
                 {
                     continue;
                 }
@@ -279,7 +174,18 @@ namespace Nerosoft.Powersheet.Npoi
             return result;
         }
 
-        protected virtual List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, int sheetIndex = 0)
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stream"></param>
+        /// <param name="options"></param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <param name="sheetIndex"></param>
+        /// <returns></returns>
+        protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, int sheetIndex = 0)
         {
             if (sheetIndex < 0)
             {
@@ -297,13 +203,20 @@ namespace Nerosoft.Powersheet.Npoi
             return Read(sheet, options, mapperAction, itemAction, valueAction);
         }
 
-        protected virtual List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName)
+        /// <summary>
+        /// 读取表格内容并按行转换为对象集合
+        /// </summary>
+        /// <param name="stream">数据流</param>
+        /// <param name="options">读取配置</param>
+        /// <param name="mapperAction"></param>
+        /// <param name="itemAction"></param>
+        /// <param name="valueAction"></param>
+        /// <param name="sheetName"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="SheetNotFoundException">指定的表格名称<seealso cref="sheetName"/>不存在时抛出此异常。</exception>
+        protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName)
         {
-            if (string.IsNullOrWhiteSpace(sheetName))
-            {
-                throw new ArgumentNullException(nameof(sheetName));
-            }
-
             var excel = new XSSFWorkbook(stream);
             ISheet sheet;
             if (!string.IsNullOrWhiteSpace(sheetName))
@@ -311,7 +224,7 @@ namespace Nerosoft.Powersheet.Npoi
                 var names = GetSheetNames();
                 if (names.All(t => t.Equals(sheetName)))
                 {
-                    throw new InvalidOperationException($"The workbook does not contains a sheet named '{sheetName}'");
+                    throw new SheetNotFoundException(sheetName, $"The workbook does not contains a sheet named '{sheetName}'");
                 }
 
                 sheet = excel.GetSheet(sheetName);
@@ -332,6 +245,12 @@ namespace Nerosoft.Powersheet.Npoi
             }
         }
 
+        /// <summary>
+        /// 获取单元格值
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="valueType"></param>
+        /// <returns></returns>
         protected virtual object GetCellValue(ICell cell, Type valueType)
         {
             if (cell == null)
@@ -374,6 +293,11 @@ namespace Nerosoft.Powersheet.Npoi
             return value;
         }
 
+        /// <summary>
+        /// 获取单元格值
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
         protected virtual object GetCellValue(ICell cell)
         {
             if (cell == null)
@@ -404,7 +328,5 @@ namespace Nerosoft.Powersheet.Npoi
 
             return cell.NumericCellValue;
         }
-
-        
     }
 }

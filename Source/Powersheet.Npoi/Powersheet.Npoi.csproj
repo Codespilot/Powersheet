@@ -6,9 +6,8 @@
     <Authors>damon</Authors>
     <Company>Nerosoft Co., Ltd.</Company>
     <Product>Powersheet</Product>
-    <Version>2021.07.20</Version>
+    <Version>2021.07.22</Version>
     <Copyright>©2018-2021 Nerosoft. All Rights Reserved.</Copyright>
-    <LangVersion>latest</LangVersion>
     <LangVersion>latest</LangVersion>
     <Title>Powersheet NPOI implementation.</Title>
     <PackageProjectUrl>https://github.com/realzhaorong/Powersheet</PackageProjectUrl>
@@ -16,8 +15,16 @@
     <PackageIconUrl>https://raw.githubusercontent.com/realzhaorong/Powersheet/master/Logo.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/realzhaorong/Powersheet</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
-    <Description>Powersheet is a useful toolkit to import/export excel data from/to object collection or datatable.</Description>
+    <Description>Powersheet是一个基于.net standard 2.1开发的跨平台的Excel数据导入、导出类库。
+配置灵活，使用方便。
+支持DataTable、List&lt;T&gt;作为数据源。
+支持侵入和非侵入两种字段映射配置方式。</Description>
     <PackageTags>Excel, Spreadsheet, NPOI, EPPLUS</PackageTags>
+    <PackageReleaseNotes>1. 写入方法添加验证配置；
+2. UseMapProfile改为AddMapProfile；
+3. WriteAsync新增委托方法作为数据源；
+4. 增加Default属性获取默认SheetWrapper实例；
+5. 支持通过SheetColumnMapAttribute配置映射关系；</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">

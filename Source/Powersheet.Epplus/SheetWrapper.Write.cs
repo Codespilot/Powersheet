@@ -10,10 +10,18 @@ using OfficeOpenXml;
 
 namespace Nerosoft.Powersheet.Epplus
 {
+    /// <summary>
+    /// 基于EPPLUS实现表格解析
+    /// </summary>
     public partial class SheetWrapper
     {
+        /// <inherited/>
         public override async Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
         {
+            options ??= new SheetWriteOptions();
+
+            options.Validate();
+
             var columnsInDataTale = (from DataColumn column in data.Columns select column.ColumnName)
                                     .Where(name => !options.IgnoreNames.Contains(name, StringComparer.OrdinalIgnoreCase))
                                     .ToList();
@@ -51,8 +59,13 @@ namespace Nerosoft.Powersheet.Epplus
             return stream;
         }
 
+        /// <inherited/>
         public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
         {
+            options ??= new SheetWriteOptions();
+
+            options.Validate();
+
             var properties = typeof(T).GetProperties();
 
             var mappers = new Dictionary<int, SheetColumnMapProfile>();
@@ -96,6 +109,7 @@ namespace Nerosoft.Powersheet.Epplus
             return stream;
         }
 
+        /// <inherited/>
         public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber = 1, int columnNumber = 1, string sheetName = "", Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default)
         {
             var excel = new ExcelPackage();
@@ -118,6 +132,15 @@ namespace Nerosoft.Powersheet.Epplus
             return stream;
         }
 
+        /// <summary>
+        /// 将数据集合写入到表格
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="sheet"></param>
+        /// <param name="options"></param>
+        /// <param name="mappers"></param>
+        /// <param name="valueAction"></param>
         protected virtual void Write<T>(IEnumerable<T> data, ExcelWorksheet sheet, SheetWriteOptions options, Dictionary<int, SheetColumnMapProfile> mappers, Func<T, string, object> valueAction)
         {
             var currentRowNumber = options.HeaderRowNumber + 1;

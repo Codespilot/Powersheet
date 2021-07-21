@@ -3,11 +3,22 @@ using System.Globalization;
 
 namespace Nerosoft.Powersheet
 {
+    /// <summary>
+    /// 表格列映射配置
+    /// </summary>
     public class SheetColumnMapProfile
     {
+        /// <summary>
+        /// 初始化一个<see cref="SheetColumnMapProfile"/>实例。
+        /// </summary>
         public SheetColumnMapProfile()
-        { }
+        {
+        }
 
+        /// <summary>
+        /// 初始化一个<see cref="SheetColumnMapProfile"/>实例。
+        /// </summary>
+        /// <param name="name"></param>
         public SheetColumnMapProfile(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -18,6 +29,11 @@ namespace Nerosoft.Powersheet
             Name = name;
         }
 
+        /// <summary>
+        /// 初始化一个<see cref="SheetColumnMapProfile"/>实例。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="columnName"></param>
         public SheetColumnMapProfile(string name, string columnName)
             : this(name)
         {
@@ -25,18 +41,55 @@ namespace Nerosoft.Powersheet
             {
                 throw new ArgumentNullException(nameof(columnName));
             }
+
             ColumnName = columnName;
         }
 
-        public SheetColumnMapProfile(string name, string columnName, Func<object, CultureInfo, object> valueConvert) 
+        /// <summary>
+        /// 初始化一个<see cref="SheetColumnMapProfile"/>实例。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConvert"></param>
+        public SheetColumnMapProfile(string name, string columnName, Func<object, CultureInfo, object> valueConvert)
             : this(name, columnName)
         {
             ValueConvert = valueConvert;
         }
 
-        public SheetColumnMapProfile(string name, string columnName, ICellValueConverter valueConverter) 
+        /// <summary>
+        /// 初始化一个<see cref="SheetColumnMapProfile"/>实例。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConverter"></param>
+        public SheetColumnMapProfile(string name, string columnName, ICellValueConverter valueConverter)
             : this(name, columnName)
         {
+            ValueConverter = valueConverter;
+        }
+
+        /// <summary>
+        /// 初始化一个<see cref="SheetColumnMapProfile"/>实例。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConverterType"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public SheetColumnMapProfile(string name, string columnName, Type valueConverterType)
+            : this(name, columnName)
+        {
+            if (valueConverterType == null)
+            {
+                return;
+            }
+
+            if (valueConverterType.IsSubclassOf(typeof(ICellValueConverter)))
+            {
+                throw new InvalidOperationException($"The value converter must implements {nameof(ICellValueConverter)}.");
+            }
+
+            var valueConverter = (ICellValueConverter) Activator.CreateInstance(valueConverterType);
             ValueConverter = valueConverter;
         }
 

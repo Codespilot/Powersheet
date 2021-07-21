@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace Nerosoft.Powersheet
 {
+    /// <summary>
+    /// To be added.
+    /// </summary>
     public abstract class SheetHandleOptions
     {
         private readonly List<SheetColumnMapProfile> _mapping = new();
@@ -26,11 +29,27 @@ namespace Nerosoft.Powersheet
         public int? RowCount { get; set; }
 
         /// <summary>
+        /// 获取忽略的项（表格列名或对象属性名）
+        /// </summary>
+        public abstract IEnumerable<string> IgnoreNames { get; }
+
+        /// <summary>
+        /// 添加忽略的项（表格列名或对象属性名）
+        /// </summary>
+        /// <param name="names"></param>
+        public abstract void IgnoreName(params string[] names);
+
+        /// <summary>
         /// 获取列映射配置
         /// </summary>
         public IEnumerable<SheetColumnMapProfile> Mapping => _mapping;
 
-        public void AddMapProfile(SheetColumnMapProfile option)
+        /// <summary>
+        /// 添加映射配置
+        /// </summary>
+        /// <param name="option"></param>
+        /// <returns>当前实例</returns>
+        public SheetHandleOptions AddMapProfile(SheetColumnMapProfile option)
         {
             if (_mapping.Any(t => t.Name.Equals(option.Name)))
             {
@@ -43,21 +62,54 @@ namespace Nerosoft.Powersheet
             }
 
             _mapping.Add(option);
+            return this;
         }
 
-        public void AddMapProfile(string name, string columnName)
+        /// <summary>
+        /// 添加映射配置
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="columnName"></param>
+        /// <returns></returns>
+        public SheetHandleOptions AddMapProfile(string name, string columnName)
         {
-            AddMapProfile(new SheetColumnMapProfile(name, columnName));
+            return AddMapProfile(new SheetColumnMapProfile(name, columnName));
         }
 
-        public void AddMapProfile(string name, string columnName, Func<object, CultureInfo, object> valueConvert)
+        /// <summary>
+        /// 添加映射配置
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConvert"></param>
+        /// <returns></returns>
+        public SheetHandleOptions AddMapProfile(string name, string columnName, Func<object, CultureInfo, object> valueConvert)
         {
-            AddMapProfile(new SheetColumnMapProfile(name, columnName, valueConvert));
+            return AddMapProfile(new SheetColumnMapProfile(name, columnName, valueConvert));
         }
 
-        public void AddMapProfile(string name, string columnName, ICellValueConverter valueConverter)
+        /// <summary>
+        /// 添加映射配置
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConverter"></param>
+        /// <returns></returns>
+        public SheetHandleOptions AddMapProfile(string name, string columnName, ICellValueConverter valueConverter)
         {
-            AddMapProfile(new SheetColumnMapProfile(name, columnName, valueConverter));
+            return AddMapProfile(new SheetColumnMapProfile(name, columnName, valueConverter));
+        }
+
+        /// <summary>
+        /// 添加映射配置
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="columnName"></param>
+        /// <param name="valueConverterType"></param>
+        /// <returns></returns>
+        public SheetHandleOptions AddMapProfile(string name, string columnName, Type valueConverterType)
+        {
+            return AddMapProfile(new SheetColumnMapProfile(name, columnName, valueConverterType));
         }
     }
 }
