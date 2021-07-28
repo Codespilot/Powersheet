@@ -36,9 +36,9 @@ dotnet add package Powersheet.Epplus
 
 项目文件
 ```xml
-<PackageReference Include="Powersheet.Core" Version="2021.7.20" />
-<PackageReference Include="Powersheet.Npoi" Version="2021.7.20" />
-<PackageReference Include="Powersheet.Epplus" Version="2021.7.20" />
+<PackageReference Include="Powersheet.Core" Version="2021.7.30" />
+<PackageReference Include="Powersheet.Npoi" Version="2021.7.30" />
+<PackageReference Include="Powersheet.Epplus" Version="2021.7.30" />
 ```
 
 ### 配置依赖注入

@@ -214,7 +214,7 @@ namespace Nerosoft.Powersheet.Npoi
         /// <param name="sheetName"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        /// <exception cref="SheetNotFoundException">指定的表格名称<seealso cref="sheetName"/>不存在时抛出此异常。</exception>
+        /// <exception cref="SheetNotFoundException">指定的表格名称不存在时抛出此异常。</exception>
         protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName)
         {
             var excel = new XSSFWorkbook(stream);

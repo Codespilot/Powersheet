@@ -40,7 +40,9 @@ namespace Nerosoft.Powersheet.Epplus
                 var mapper = options.GetMapProfile(name);
                 mapper ??= new SheetColumnMapProfile(name, name);
 
-                sheet.Cells[options.HeaderRowNumber, sheetColumnIndex].Value = mapper.ColumnName;
+                var cell = sheet.Cells[options.FirstColumnNumber, sheetColumnIndex];
+                cell.Value = mapper.ColumnName;
+                cell.SetCellStyle(options.HeaderStyle);
 
                 mappers.Add(sheetColumnIndex, mapper);
             }
@@ -89,7 +91,10 @@ namespace Nerosoft.Powersheet.Epplus
 
                 var mapper = options.GetMapProfile(name);
                 mapper ??= new SheetColumnMapProfile(name, name);
-                sheet.Cells[options.FirstColumnNumber, sheetColumnIndex].Value = mapper.ColumnName;
+                var cell = sheet.Cells[options.FirstColumnNumber, sheetColumnIndex];
+                cell.Value = mapper.ColumnName;
+                cell.SetCellStyle(options.HeaderStyle);
+
                 mappers.Add(sheetColumnIndex, mapper);
 
                 index++;
@@ -163,7 +168,9 @@ namespace Nerosoft.Powersheet.Epplus
                         cellValue = sourceValue;
                     }
 
-                    sheet.Cells[currentRowNumber, columnNumber].Value = cellValue;
+                    var cell = sheet.Cells[currentRowNumber, columnNumber];
+                    cell.Value = cellValue;
+                    cell.SetCellStyle(options.BodyStyle);
                 }
 
                 currentRowNumber++;
