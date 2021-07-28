@@ -26,19 +26,12 @@ Powersheet是一个基于.net standard 2.1开发的跨平台的Excel数据导入
 > Powersheet.Epplus或Powersheet.Npoi根据需要安装其一即可。如果需要自行实现表格读取，仅需要引入Powersheet.Core。
 
 命令行
-```ps
+```bash
 dotnet add package Powersheet.Core 
 
 dotnet add package Powersheet.Npoi 
 
 dotnet add package Powersheet.Epplus 
-```
-
-项目文件
-```xml
-<PackageReference Include="Powersheet.Core" Version="2021.7.30" />
-<PackageReference Include="Powersheet.Npoi" Version="2021.7.30" />
-<PackageReference Include="Powersheet.Epplus" Version="2021.7.30" />
 ```
 
 ### 配置依赖注入
