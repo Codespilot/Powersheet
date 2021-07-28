@@ -26,7 +26,7 @@ Powersheet是一个基于.net standard 2.1开发的跨平台的Excel数据导入
 > Powersheet.Epplus或Powersheet.Npoi根据需要安装其一即可。如果需要自行实现表格读取，仅需要引入Powersheet.Core。
 
 命令行
-```bash
+```shell
 dotnet add package Powersheet.Core 
 
 dotnet add package Powersheet.Npoi 
@@ -46,7 +46,7 @@ services.AddSingleton<ISheetWrapper, SheetWrapper>();
 builder.RegisterType<SheetWrapper>().As<ISheetWrapper>().SingleInstance();
 ```
 
-如果使用EPPLUS版本的实现，还需要在appsetting.json文件增加一个配置节点
+如果使用EPPLUS版本的实现，还需要在appSettings.json文件增加一个配置节点
 ```json
 "EPPlus": {
     "ExcelPackage": {
@@ -125,7 +125,7 @@ Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumb
 
 Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object,  CultureInfo, T> valueConvert, CancellationToken cancellationToken);
 1. stream - 文件流
-2. firstRowNumber - 起始行号，从1开始
+2. firstRowNumber - 起始行号，起始值为1
 3. columnNumber - 列号，起始值为1
 4. sheetIndex - 表格位置索引，起始值为0
 5. valueConvert - 值转换方法
