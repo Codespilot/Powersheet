@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using NPOI.SS.UserModel;
 
 namespace Nerosoft.Powersheet.Npoi
@@ -9,6 +8,13 @@ namespace Nerosoft.Powersheet.Npoi
     /// </summary>
     internal static class Extensions
     {
+        /// <summary>
+        /// 设置单元格样式
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="style"></param>
+        /// <param name="cellStyle"></param>
+        /// <param name="font"></param>
         internal static void SetCellStyle(this ICell cell, CellStyle style, ICellStyle cellStyle, IFont font)
         {
             if (cell == null || style == null || cellStyle == null)
@@ -40,6 +46,7 @@ namespace Nerosoft.Powersheet.Npoi
             }
 
             #region Set font
+
             if (font != null)
             {
                 if (!string.IsNullOrWhiteSpace(style.FontName))
@@ -61,6 +68,7 @@ namespace Nerosoft.Powersheet.Npoi
 
                 cellStyle.SetFont(font);
             }
+
             #endregion
 
             cellStyle.WrapText = style.WrapText;
@@ -70,7 +78,7 @@ namespace Nerosoft.Powersheet.Npoi
             cell.CellStyle = cellStyle;
         }
 
-        internal static NPOI.SS.UserModel.HorizontalAlignment Convert(this HorizontalAlignment alignment)
+        private static NPOI.SS.UserModel.HorizontalAlignment Convert(this HorizontalAlignment alignment)
         {
             return alignment switch
             {
@@ -81,7 +89,7 @@ namespace Nerosoft.Powersheet.Npoi
             };
         }
 
-        internal static NPOI.SS.UserModel.VerticalAlignment Convert(this VerticalAlignment alignment)
+        private static NPOI.SS.UserModel.VerticalAlignment Convert(this VerticalAlignment alignment)
         {
             return alignment switch
             {
@@ -92,7 +100,7 @@ namespace Nerosoft.Powersheet.Npoi
             };
         }
 
-        internal static NPOI.SS.UserModel.BorderStyle Convert(this BorderStyle borderStyle)
+        private static NPOI.SS.UserModel.BorderStyle Convert(this BorderStyle borderStyle)
         {
             var value = borderStyle.ToString();
             return Enum.Parse<NPOI.SS.UserModel.BorderStyle>(value, true);

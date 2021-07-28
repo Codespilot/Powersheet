@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NPOI.SS.UserModel;
-using NPOI.XSSF.Model;
 using NPOI.XSSF.UserModel;
 
 namespace Nerosoft.Powersheet.Npoi
@@ -131,7 +130,7 @@ namespace Nerosoft.Powersheet.Npoi
         }
 
         /// <inherited/>
-        public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber = 1, int columnNumber = 1, string sheetName = "", Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default)
+        public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber, int columnNumber, string sheetName, Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
             {
@@ -168,11 +167,11 @@ namespace Nerosoft.Powersheet.Npoi
         /// <param name="options"></param>
         /// <param name="mappers"></param>
         /// <param name="valueAction"></param>
-        /// <param name="style"></param>
-        protected virtual void Write<T>(IEnumerable<T> data, ISheet sheet, SheetWriteOptions options, Dictionary<int, SheetColumnMapProfile> mappers, Func<T, string, object> valueAction, IWorkbook workbook)
+        /// <param name="excel"></param>
+        protected virtual void Write<T>(IEnumerable<T> data, ISheet sheet, SheetWriteOptions options, Dictionary<int, SheetColumnMapProfile> mappers, Func<T, string, object> valueAction, IWorkbook excel)
         {
-            var style = workbook.CreateCellStyle();
-            var font = workbook.CreateFont();
+            var style = excel.CreateCellStyle();
+            var font = excel.CreateFont();
 
             var currentRowNumber = GetHeaderRowNumber(sheet, options.HeaderRowNumber) + 1;
 

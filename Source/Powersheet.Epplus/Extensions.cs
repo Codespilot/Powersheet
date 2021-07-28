@@ -5,7 +5,7 @@ using OfficeOpenXml.Style;
 namespace Nerosoft.Powersheet.Epplus
 {
     /// <summary>
-    /// 扩张方法
+    /// 扩展方法
     /// </summary>
     internal static class Extensions
     {
@@ -60,7 +60,7 @@ namespace Nerosoft.Powersheet.Epplus
             cell.Style.Font.Italic = style.Italic;
         }
 
-        internal static ExcelHorizontalAlignment Convert(this HorizontalAlignment alignment)
+        private static ExcelHorizontalAlignment Convert(this HorizontalAlignment alignment)
         {
             return alignment switch
             {
@@ -71,7 +71,7 @@ namespace Nerosoft.Powersheet.Epplus
             };
         }
 
-        internal static ExcelVerticalAlignment Convert(this VerticalAlignment alignment)
+        private static ExcelVerticalAlignment Convert(this VerticalAlignment alignment)
         {
             return alignment switch
             {
@@ -82,7 +82,7 @@ namespace Nerosoft.Powersheet.Epplus
             };
         }
 
-        internal static ExcelBorderStyle Convert(this BorderStyle borderStyle)
+        private static ExcelBorderStyle Convert(this BorderStyle borderStyle)
         {
             var value = borderStyle.ToString();
             return Enum.Parse<ExcelBorderStyle>(value, true);
