@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using Xunit;
@@ -126,6 +127,23 @@ namespace Nerosoft.Powersheet.Epplus.Test
                    .AddMapProfile<Employee>(t => t.Birthdate, "出生日期")
                    .AddMapProfile<Employee>(t => t.Department, "部门")
                    .AddMapProfile<Employee>(t => t.IsActive, "是否在职", (value, _) => IsActiveValueConvert(value));
+
+            options.HeaderStyle = new CellStyle
+            {
+                FontSize = 24,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Bold = true,
+                FillColor = Color.SeaGreen,
+                FontColor = Color.White,
+                BorderColor = Color.Black,
+                BorderStyle = BorderStyle.Thin
+            };
+
+            options.BodyStyle = new CellStyle
+            {
+                BorderColor = Color.Black,
+                BorderStyle = BorderStyle.Thin
+            };
 
             var stream = await _wrapper.WriteAsync(employees, options, "职员表");
             Assert.NotEqual(0, stream.Length);

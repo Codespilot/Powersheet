@@ -28,11 +28,14 @@ namespace Nerosoft.Powersheet.Npoi
                 var mappers = new Dictionary<int, SheetColumnMapProfile>();
 
                 var excel = new XSSFWorkbook();
+                sheetName ??= "Sheet1";
                 var sheet = excel.CreateSheet(sheetName);
 
                 var headerRowNumber = GetHeaderRowNumber(sheet, options.HeaderRowNumber);
 
                 var row = sheet.CreateRow(headerRowNumber);
+                var style = excel.CreateCellStyle();
+                var font = excel.CreateFont();
 
                 for (var index = 0; index < columnsInDataTale.Count; index++)
                 {
@@ -43,7 +46,9 @@ namespace Nerosoft.Powersheet.Npoi
                     var mapper = options.GetMapProfile(name);
                     mapper ??= new SheetColumnMapProfile(name, name);
 
-                    row.CreateCell(sheetColumnIndex, CellType.String).SetCellValue(mapper.ColumnName);
+                    var cell = row.CreateCell(sheetColumnIndex, CellType.String);
+                    cell.SetCellValue(mapper.ColumnName);
+                    cell.SetCellStyle(options.HeaderStyle, style, font);
 
                     mappers.Add(sheetColumnIndex, mapper);
                 }
@@ -53,7 +58,7 @@ namespace Nerosoft.Powersheet.Npoi
                     return dataRow[name];
                 }
 
-                Write(data.Rows.OfType<DataRow>(), sheet, options, mappers, GetValue);
+                Write(data.Rows.OfType<DataRow>(), sheet, options, mappers, GetValue, excel);
 
                 var stream = new MemoryStream();
                 excel.Write(stream, true);
@@ -76,6 +81,7 @@ namespace Nerosoft.Powersheet.Npoi
                 var mappers = new Dictionary<int, SheetColumnMapProfile>();
 
                 var excel = new XSSFWorkbook();
+                sheetName ??= "Sheet1";
                 var sheet = excel.CreateSheet(sheetName);
 
                 var headerRowNumber = GetHeaderRowNumber(sheet, options.HeaderRowNumber);
@@ -83,6 +89,9 @@ namespace Nerosoft.Powersheet.Npoi
                 var row = sheet.CreateRow(headerRowNumber);
 
                 var index = 0;
+
+                var style = excel.CreateCellStyle();
+                var font = excel.CreateFont();
 
                 foreach (var property in properties)
                 {
@@ -96,7 +105,10 @@ namespace Nerosoft.Powersheet.Npoi
                     var name = property.Name;
                     var mapper = options.GetMapProfile(name);
                     mapper ??= new SheetColumnMapProfile(name, name);
-                    row.CreateCell(sheetColumnIndex, CellType.String).SetCellValue(mapper.ColumnName);
+                    var cell = row.CreateCell(sheetColumnIndex, CellType.String);
+                    cell.SetCellValue(mapper.ColumnName);
+                    cell.SetCellStyle(options.HeaderStyle, style, font);
+
                     mappers.Add(sheetColumnIndex, mapper);
 
                     index++;
@@ -107,7 +119,7 @@ namespace Nerosoft.Powersheet.Npoi
                     return properties.FirstOrDefault(t => t.Name == name)?.GetValue(item);
                 }
 
-                Write(data, sheet, options, mappers, GetValue);
+                Write(data, sheet, options, mappers, GetValue, excel);
 
                 var stream = new MemoryStream();
                 excel.Write(stream, true);
@@ -118,7 +130,7 @@ namespace Nerosoft.Powersheet.Npoi
         }
 
         /// <inherited/>
-        public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber = 1, int columnNumber = 1, string sheetName = "", Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default)
+        public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber, int columnNumber, string sheetName, Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default)
         {
             return await Task.Run(() =>
             {
@@ -133,7 +145,7 @@ namespace Nerosoft.Powersheet.Npoi
 
                     var cell = row.CreateCell(columnNumber - 1);
 
-                    SetCellValue(cell, value);
+                    cell.SetCellValue(value);
 
                     currentRowNumber++;
                 }
@@ -155,8 +167,12 @@ namespace Nerosoft.Powersheet.Npoi
         /// <param name="options"></param>
         /// <param name="mappers"></param>
         /// <param name="valueAction"></param>
-        protected virtual void Write<T>(IEnumerable<T> data, ISheet sheet, SheetWriteOptions options, Dictionary<int, SheetColumnMapProfile> mappers, Func<T, string, object> valueAction)
+        /// <param name="excel"></param>
+        protected virtual void Write<T>(IEnumerable<T> data, ISheet sheet, SheetWriteOptions options, Dictionary<int, SheetColumnMapProfile> mappers, Func<T, string, object> valueAction, IWorkbook excel)
         {
+            var style = excel.CreateCellStyle();
+            var font = excel.CreateFont();
+
             var currentRowNumber = GetHeaderRowNumber(sheet, options.HeaderRowNumber) + 1;
 
             foreach (var item in data)
@@ -180,44 +196,11 @@ namespace Nerosoft.Powersheet.Npoi
                     }
 
                     var cell = row.CreateCell(columnNumber);
-
-                    SetCellValue(cell, cellValue);
+                    cell.SetCellValue(cellValue);
+                    cell.SetCellStyle(options.BodyStyle, style, font);
                 }
 
                 currentRowNumber++;
-            }
-        }
-
-        /// <summary>
-        /// 设置单元格值
-        /// </summary>
-        /// <param name="cell"></param>
-        /// <param name="value"></param>
-        protected virtual void SetCellValue(ICell cell, object value)
-        {
-            switch (value)
-            {
-                case null:
-                    return;
-                case string cellValue:
-                    cell.SetCellValue(cellValue);
-                    break;
-                case int:
-                case long:
-                case decimal:
-                case double:
-                    cell.SetCellValue(value.ToString());
-                    cell.SetCellType(CellType.Numeric);
-                    break;
-                case DateTime cellValue:
-                    cell.SetCellValue(cellValue);
-                    break;
-                case bool cellValue:
-                    cell.SetCellValue(cellValue);
-                    break;
-                default:
-                    cell.SetCellValue(value.ToString());
-                    break;
             }
         }
     }

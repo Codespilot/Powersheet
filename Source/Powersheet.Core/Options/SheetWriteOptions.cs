@@ -17,6 +17,16 @@ namespace Nerosoft.Powersheet
         public override IEnumerable<string> IgnoreNames => _ignoreNames;
 
         /// <summary>
+        /// 标题单元格样式
+        /// </summary>
+        public CellStyle HeaderStyle { get; set; }
+
+        /// <summary>
+        /// 数据单元格样式
+        /// </summary>
+        public CellStyle BodyStyle { get; set; }
+
+        /// <summary>
         /// 根据对象属性名/DataTable列名获取映射配置
         /// </summary>
         /// <param name="name"></param>

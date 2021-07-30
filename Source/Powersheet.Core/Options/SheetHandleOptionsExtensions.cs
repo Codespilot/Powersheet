@@ -68,7 +68,6 @@ namespace Nerosoft.Powersheet
             return options.AddMapProfile(name, columnName, valueConverterType);
         }
 
-
         /// <summary>
         /// 校验选项内容
         /// </summary>

@@ -40,7 +40,9 @@ namespace Nerosoft.Powersheet.Epplus
                 var mapper = options.GetMapProfile(name);
                 mapper ??= new SheetColumnMapProfile(name, name);
 
-                sheet.Cells[options.HeaderRowNumber, sheetColumnIndex].Value = mapper.ColumnName;
+                var cell = sheet.Cells[options.FirstColumnNumber, sheetColumnIndex];
+                cell.Value = mapper.ColumnName;
+                cell.SetCellStyle(options.HeaderStyle);
 
                 mappers.Add(sheetColumnIndex, mapper);
             }
@@ -89,7 +91,10 @@ namespace Nerosoft.Powersheet.Epplus
 
                 var mapper = options.GetMapProfile(name);
                 mapper ??= new SheetColumnMapProfile(name, name);
-                sheet.Cells[options.FirstColumnNumber, sheetColumnIndex].Value = mapper.ColumnName;
+                var cell = sheet.Cells[options.FirstColumnNumber, sheetColumnIndex];
+                cell.Value = mapper.ColumnName;
+                cell.SetCellStyle(options.HeaderStyle);
+
                 mappers.Add(sheetColumnIndex, mapper);
 
                 index++;
@@ -110,7 +115,7 @@ namespace Nerosoft.Powersheet.Epplus
         }
 
         /// <inherited/>
-        public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber = 1, int columnNumber = 1, string sheetName = "", Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default)
+        public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber, int columnNumber, string sheetName, Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default)
         {
             var excel = new ExcelPackage();
             sheetName ??= "Sheet1";
@@ -163,7 +168,9 @@ namespace Nerosoft.Powersheet.Epplus
                         cellValue = sourceValue;
                     }
 
-                    sheet.Cells[currentRowNumber, columnNumber].Value = cellValue;
+                    var cell = sheet.Cells[currentRowNumber, columnNumber];
+                    cell.Value = cellValue;
+                    cell.SetCellStyle(options.BodyStyle);
                 }
 
                 currentRowNumber++;
