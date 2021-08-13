@@ -194,7 +194,7 @@ namespace Nerosoft.Powersheet
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         protected abstract List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName);
-        
+
         /// <inherited/>
         public abstract Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
 
@@ -260,12 +260,12 @@ namespace Nerosoft.Powersheet
 
                 if (!attributes.TryGetValue(property.Name, out var attribute))
                 {
-                    return;
+                    continue;
                 }
 
                 if (attribute == null)
                 {
-                    return;
+                    continue;
                 }
 
                 if (options.Mapping.Any(t => t.ColumnName == attribute.ColumnName))
