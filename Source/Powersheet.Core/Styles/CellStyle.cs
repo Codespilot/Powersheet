@@ -40,7 +40,7 @@ namespace Nerosoft.Powersheet
         /// <summary>
         /// 获取或设置文字是否折行显示
         /// </summary>
-        public bool WrapText { get; set; } = false;
+        public bool WrapText { get; set; }
 
         /// <summary>
         /// 获取或设置文字水平对齐方式

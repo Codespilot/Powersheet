@@ -15,6 +15,11 @@ namespace Nerosoft.Powersheet.Npoi
         /// </summary>
         public static ISheetWrapper Default => Instance.Value;
 
+        /// <summary>
+        /// 获取新的<see cref="ISheetWrapper"/>实例
+        /// </summary>
+        public static ISheetWrapper New => new SheetWrapper();
+
         private static int GetHeaderRowNumber(ISheet sheet, int defaultHeaderRowNumber = 1)
         {
             if (sheet.FirstRowNum == 0)

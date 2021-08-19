@@ -280,13 +280,70 @@ namespace Nerosoft.Powersheet
         }
 
         /// <summary>
+        /// 设置样式
+        /// </summary>
+        /// <param name="options"></param>
+        /// <typeparam name="T"></typeparam>
+        protected virtual void SetStyle<T>(SheetWriteOptions options)
+            where T : class
+        {
+            var type = typeof(T);
+
+            if (options.HeaderStyle == null)
+            {
+                var attribute = type.GetCustomAttribute<SheetHeaderStyleAttribute>();
+                if (attribute != null)
+                {
+                    options.HeaderStyle = attribute?.Style;
+                }
+                else
+                {
+                    var attributes = type.GetCustomAttributes().OfType<ISheetStyleAttribute>();
+
+                    if (attributes.Any())
+                    {
+                        options.HeaderStyle = new CellStyle();
+                    }
+
+                    foreach (var attr in attributes)
+                    {
+                        attr.SetStyle(options.HeaderStyle);
+                    }
+                }
+            }
+
+            if (options.BodyStyle == null)
+            {
+                var attribute = type.GetCustomAttribute<SheetBodyStyleAttribute>();
+                if (attribute != null)
+                {
+                    options.BodyStyle = attribute.Style;
+                }
+                else
+                {
+                    var attributes = type.GetCustomAttributes().OfType<ISheetStyleAttribute>();
+
+                    if (attributes.Any())
+                    {
+                        options.BodyStyle = new CellStyle();
+                    }
+
+                    foreach (var attr in attributes)
+                    {
+                        attr.SetStyle(options.BodyStyle);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// 设置对象属性值
         /// </summary>
-        /// <param name="properties"></param>
-        /// <param name="item"></param>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
-        /// <typeparam name="T"></typeparam>
+        /// <param name="properties">属性字典</param>
+        /// <param name="item">设置的对象</param>
+        /// <param name="name">属性名称</param>
+        /// <param name="value">属性值</param>
+        /// <typeparam name="T">对象类型</typeparam>
         protected virtual void SetValue<T>(IDictionary<string, PropertyInfo> properties, T item, string name, object value)
         {
             if (!properties.TryGetValue(name, out var property))

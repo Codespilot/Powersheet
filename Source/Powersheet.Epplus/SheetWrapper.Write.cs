@@ -65,9 +65,9 @@ namespace Nerosoft.Powersheet.Epplus
         public override async Task<Stream> WriteAsync<T>(IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
         {
             options ??= new SheetWriteOptions();
-
             options.Validate();
-
+            SetStyle<T>(options);
+            
             var properties = typeof(T).GetProperties();
 
             var mappers = new Dictionary<int, SheetColumnMapProfile>();
