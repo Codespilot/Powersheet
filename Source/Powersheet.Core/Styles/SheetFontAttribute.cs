@@ -3,6 +3,9 @@ using System.Drawing;
 
 namespace Nerosoft.Powersheet
 {
+    /// <summary>
+    /// 字体样式
+    /// </summary>
     public abstract class SheetFontAttribute : Attribute, ISheetStyleAttribute
     {
         /// <summary>
@@ -40,11 +43,17 @@ namespace Nerosoft.Powersheet
         }
     }
 
+    /// <summary>
+    /// 表头字体样式
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class SheetHeaderFontAttribute : SheetFontAttribute
     {
     }
 
+    /// <summary>
+    /// 数据字体样式
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class SheetBodyFontAttribute : SheetFontAttribute
     {

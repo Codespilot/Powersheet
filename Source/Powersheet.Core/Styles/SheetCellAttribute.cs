@@ -3,6 +3,9 @@ using System.Drawing;
 
 namespace Nerosoft.Powersheet
 {
+    /// <summary>
+    /// 单元格样式
+    /// </summary>
     public abstract class SheetCellAttribute : Attribute, ISheetStyleAttribute
     {
         /// <summary>
@@ -35,11 +38,17 @@ namespace Nerosoft.Powersheet
         }
     }
 
+    /// <summary>
+    /// 表头单元格样式
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class SheetHeaderCellAttribute : SheetCellAttribute
     {
     }
 
+    /// <summary>
+    /// 数据单元格样式
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class SheetBodyCellAttribute : SheetCellAttribute
     {

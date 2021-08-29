@@ -3,6 +3,9 @@ using System.Drawing;
 
 namespace Nerosoft.Powersheet
 {
+    /// <summary>
+    /// 单元格边框样式
+    /// </summary>
     public abstract class SheetBorderAttribute : Attribute, ISheetStyleAttribute
     {
         /// <summary>
@@ -32,6 +35,9 @@ namespace Nerosoft.Powersheet
         }
     }
 
+    /// <summary>
+    /// 表头单元格边框样式
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class SheetHeaderBorderAttribute : SheetBorderAttribute
     {
@@ -41,6 +47,9 @@ namespace Nerosoft.Powersheet
         }
     }
 
+    /// <summary>
+    /// 数据单元格边框样式
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class SheetBodyBorderAttribute : SheetBorderAttribute
     {
