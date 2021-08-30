@@ -13,5 +13,10 @@ namespace Nerosoft.Powersheet.Epplus
         /// 获取默认<see cref="ISheetWrapper"/>实例
         /// </summary>
         public static ISheetWrapper Default => Instance.Value;
+        
+        /// <summary>
+        /// 获取新的<see cref="ISheetWrapper"/>实例
+        /// </summary>
+        public static ISheetWrapper New => new SheetWrapper();
     }
 }

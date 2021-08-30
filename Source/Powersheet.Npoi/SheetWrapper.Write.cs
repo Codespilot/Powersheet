@@ -73,7 +73,8 @@ namespace Nerosoft.Powersheet.Npoi
         {
             options ??= new SheetWriteOptions();
             options.Validate();
-
+            SetStyle<T>(options);
+            
             return await Task.Run(() =>
             {
                 var properties = typeof(T).GetProperties();
