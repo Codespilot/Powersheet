@@ -6,7 +6,7 @@
     <Authors>damon</Authors>
     <Company>Nerosoft Co., Ltd.</Company>
     <Product>Powersheet</Product>
-    <Version>2021.08.30</Version>
+    <Version>2021.10.13</Version>
     <Copyright>©2018-2021 Nerosoft. All Rights Reserved.</Copyright>
     <LangVersion>latest</LangVersion>
     <Title>Powersheet EPPLUS implementation.</Title>
@@ -20,7 +20,7 @@
 支持DataTable、List&lt;T&gt;作为数据源。
 支持侵入和非侵入两种字段映射配置方式。</Description>
     <PackageTags>Excel, Spreadsheet, NPOI, EPPLUS</PackageTags>
-    <PackageReleaseNotes>1. 支持使用Attribute设置单元格样式；</PackageReleaseNotes>
+    <PackageReleaseNotes>1. 新增SheetHandleOptionsBuilder；</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
@@ -36,7 +36,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPPlus" Version="5.7.4" />
+    <PackageReference Include="EPPlus" Version="5.7.5" />
   </ItemGroup>
 
   <ItemGroup>

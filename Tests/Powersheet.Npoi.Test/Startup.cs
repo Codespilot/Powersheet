@@ -18,7 +18,7 @@ namespace Powersheet.Npoi.Test
                        {
                            builder.AddJsonFile("appsettings.json");
                        })
-                       .ConfigureServices((context, services) =>
+                       .ConfigureServices((_, services) =>
                        {
                            services.AddSingleton<ISheetWrapper, SheetWrapper>();
                        });
