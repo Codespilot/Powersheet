@@ -108,43 +108,48 @@ namespace Nerosoft.Powersheet.Epplus.Test
                 new() {Name = "王小丫", Gender = 1, Age = 28, Birthdate = DateTime.Parse("1993/4/22"), Department = "法务部", IsActive = true}
             };
 
-            var options = new SheetWriteOptions();
+            var builder = SheetHandleOptionsBuilder<Employee>.For<SheetWriteOptions>()
+                .ConfigureProfile(item =>
+                {
+                    item.Property(t => t.Id).HasColumnName("编号");
+                    item.Property(t => t.Name).HasColumnName("姓名");
+                    item.Property(t => t.Gender).HasColumnName("性别").HasValueConverter((value, _) =>
+                    {
+                        return value switch
+                        {
+                            1 => "男",
+                            "1" => "男",
+                            2 => "女",
+                            "2" => "女",
+                            _ => ""
+                        };
+                    });
+                    item.Property(t => t.Birthdate).HasColumnName("出生日期");
+                    item.Property(t => t.Age).HasColumnName("年龄");
+                    item.Property(t => t.Department).HasColumnName("部门");
+                    item.Property(t => t.IsActive).HasColumnName("是否在职").HasValueConverter((value, _) => IsActiveValueConvert(value));
+                })
+                .ConfigureOptions(options =>
+                {
+                    options.HeaderStyle = new CellStyle
+                    {
+                        FontSize = 24,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Bold = true,
+                        FillColor = Color.SeaGreen,
+                        FontColor = Color.White,
+                        BorderColor = Color.Black,
+                        BorderStyle = BorderStyle.Thin
+                    };
 
-            options.AddMapProfile<Employee>(t => t.Id, "编号")
-                   .AddMapProfile<Employee>(t => t.Name, "姓名")
-                   .AddMapProfile<Employee>(t => t.Gender, "性别", (value, _) =>
-                   {
-                       return value switch
-                       {
-                           1 => "男",
-                           "1" => "男",
-                           2 => "女",
-                           "2" => "女",
-                           _ => ""
-                       };
-                   })
-                   .AddMapProfile<Employee>(t => t.Age, "年龄")
-                   .AddMapProfile<Employee>(t => t.Birthdate, "出生日期")
-                   .AddMapProfile<Employee>(t => t.Department, "部门")
-                   .AddMapProfile<Employee>(t => t.IsActive, "是否在职", (value, _) => IsActiveValueConvert(value));
+                    options.BodyStyle = new CellStyle
+                    {
+                        BorderColor = Color.Black,
+                        BorderStyle = BorderStyle.Thin
+                    };
+                });
 
-            options.HeaderStyle = new CellStyle
-            {
-                FontSize = 24,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Bold = true,
-                FillColor = Color.SeaGreen,
-                FontColor = Color.White,
-                BorderColor = Color.Black,
-                BorderStyle = BorderStyle.Thin
-            };
-
-            options.BodyStyle = new CellStyle
-            {
-                BorderColor = Color.Black,
-                BorderStyle = BorderStyle.Thin
-            };
-
+            var options = builder.Options;
             var stream = await _wrapper.WriteAsync(employees, options, "职员表");
             Assert.NotEqual(0, stream.Length);
             using (stream)
