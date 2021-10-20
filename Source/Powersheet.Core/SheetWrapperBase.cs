@@ -294,7 +294,7 @@ namespace Nerosoft.Powersheet
                 var attribute = type.GetCustomAttribute<SheetHeaderStyleAttribute>();
                 if (attribute != null)
                 {
-                    options.HeaderStyle = attribute?.Style;
+                    options.HeaderStyle = attribute.Style;
                 }
                 else
                 {

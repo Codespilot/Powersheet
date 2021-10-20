@@ -109,45 +109,46 @@ namespace Nerosoft.Powersheet.Epplus.Test
             };
 
             var builder = SheetHandleOptionsBuilder<Employee>.For<SheetWriteOptions>()
-                .ConfigureProfile(item =>
-                {
-                    item.Property(t => t.Id).HasColumnName("编号");
-                    item.Property(t => t.Name).HasColumnName("姓名");
-                    item.Property(t => t.Gender).HasColumnName("性别").HasValueConverter((value, _) =>
-                    {
-                        return value switch
-                        {
-                            1 => "男",
-                            "1" => "男",
-                            2 => "女",
-                            "2" => "女",
-                            _ => ""
-                        };
-                    });
-                    item.Property(t => t.Birthdate).HasColumnName("出生日期");
-                    item.Property(t => t.Age).HasColumnName("年龄");
-                    item.Property(t => t.Department).HasColumnName("部门");
-                    item.Property(t => t.IsActive).HasColumnName("是否在职").HasValueConverter((value, _) => IsActiveValueConvert(value));
-                })
-                .ConfigureOptions(options =>
-                {
-                    options.HeaderStyle = new CellStyle
-                    {
-                        FontSize = 24,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        Bold = true,
-                        FillColor = Color.SeaGreen,
-                        FontColor = Color.White,
-                        BorderColor = Color.Black,
-                        BorderStyle = BorderStyle.Thin
-                    };
+                                                             .ConfigureProfile(item =>
+                                                             {
+                                                                 item.Property(t => t.Id).HasColumnName("编号");
+                                                                 item.Property(t => t.Name).HasColumnName("姓名");
+                                                                 item.Property(t => t.Gender)
+                                                                     .HasColumnName("性别")
+                                                                     .HasValueConverter((value, _) =>
+                                                                     {
+                                                                         return value switch
+                                                                         {
+                                                                             1 => "男",
+                                                                             2 => "女",
+                                                                             _ => ""
+                                                                         };
+                                                                     });
+                                                                 item.Property(t => t.Birthdate).HasColumnName("出生日期");
+                                                                 item.Property(t => t.Age).HasColumnName("年龄");
+                                                                 item.Property(t => t.Department).HasColumnName("部门");
+                                                                 item.Property(t => t.IsActive).HasColumnName("是否在职")
+                                                                     .HasValueConverter((value, _) => IsActiveValueConvert(value));
+                                                             })
+                                                             .ConfigureOptions(options =>
+                                                             {
+                                                                 options.HeaderStyle = new CellStyle
+                                                                 {
+                                                                     FontSize = 24,
+                                                                     HorizontalAlignment = HorizontalAlignment.Center,
+                                                                     Bold = true,
+                                                                     FillColor = Color.SeaGreen,
+                                                                     FontColor = Color.White,
+                                                                     BorderColor = Color.Black,
+                                                                     BorderStyle = BorderStyle.Thin
+                                                                 };
 
-                    options.BodyStyle = new CellStyle
-                    {
-                        BorderColor = Color.Black,
-                        BorderStyle = BorderStyle.Thin
-                    };
-                });
+                                                                 options.BodyStyle = new CellStyle
+                                                                 {
+                                                                     BorderColor = Color.Black,
+                                                                     BorderStyle = BorderStyle.Thin
+                                                                 };
+                                                             });
 
             var options = builder.Options;
             var stream = await _wrapper.WriteAsync(employees, options, "职员表");

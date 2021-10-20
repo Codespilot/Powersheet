@@ -78,6 +78,7 @@ namespace Nerosoft.Powersheet.Epplus.Test
         {
             var file = Path.Combine(AppContext.BaseDirectory, "Samples", "Employees.CN.xlsx");
 
+            /*
             var options = new SheetReadOptions();
 
             options.AddMapProfile("Id", "编号");
@@ -94,7 +95,32 @@ namespace Nerosoft.Powersheet.Epplus.Test
             options.AddMapProfile("Age", "年龄");
             options.AddMapProfile("Birthdate", "出生日期");
             options.AddMapProfile("IsActive", "是否在职", (value, _) => IsActiveValueConvert(value));
+*/
+            
+            var builder = SheetHandleOptionsBuilder<Employee>.For<SheetReadOptions>()
+                                                             .ConfigureProfile(item =>
+                                                             {
+                                                                 item.Property(t => t.Id).HasColumnName("编号");
+                                                                 item.Property(t => t.Name).HasColumnName("姓名");
+                                                                 item.Property(t => t.Gender).HasColumnName("性别")
+                                                                     .HasValueConverter((value, _) =>
+                                                                     {
+                                                                         return value switch
+                                                                         {
+                                                                             null => 0,
+                                                                             "男" => 1,
+                                                                             "女" => 2,
+                                                                             _ => 0
+                                                                         };
+                                                                     });
+                                                                 item.Property(t => t.Birthdate).HasColumnName("出生日期");
+                                                                 item.Property(t => t.Age).HasColumnName("年龄");
+                                                                 item.Property(t => t.Department).HasColumnName("部门");
+                                                                 item.Property(t => t.IsActive).HasColumnName("是否在职")
+                                                                     .HasValueConverter((value, _) => IsActiveValueConvert(value));
+                                                             });
 
+            var options = builder.Options;
             var result = await _wrapper.ReadToListAsync<EmployeeInvasiveMap>(file, options, 0);
             Assert.Equal(3, result.Count);
         }
