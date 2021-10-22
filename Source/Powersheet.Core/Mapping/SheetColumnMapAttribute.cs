@@ -42,8 +42,8 @@ namespace Nerosoft.Powersheet
 
         /// <summary>
         /// 获取或设置单元格值转换器类型。
-        /// 转换器必须实现 <see cref="ICellValueConverter"/> 的方法并且包含一个无参构造器。 -- or has non-static public method 'public object Convert(object value, Type targetType, CultureInfo culture);'.
-        /// 转换器通过无参构造器构造的对象必须能够完整的实现<see cref="ICellValueConverter"/>的Convert方法。
+        /// 转换器必须实现 <see cref="IValueConverter"/> 的方法并且包含一个无参构造器。 -- or has non-static public method 'public object ConvertCellValue(object value, Type targetType, CultureInfo culture);'.
+        /// 转换器通过无参构造器构造的对象必须能够完整的实现<see cref="IValueConverter"/>的Convert方法。
         /// </summary>
         public Type ValueConverter { get; set; }
     }

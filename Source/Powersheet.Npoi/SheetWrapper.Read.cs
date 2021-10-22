@@ -158,7 +158,7 @@ namespace Nerosoft.Powersheet.Npoi
                     }
                     else if (mapper.ValueConverter != null)
                     {
-                        value = mapper.ValueConverter.Convert(cellValue, CultureInfo.CurrentCulture);
+                        value = mapper.ValueConverter.ConvertCellValue(cellValue, CultureInfo.CurrentCulture);
                     }
                     else
                     {

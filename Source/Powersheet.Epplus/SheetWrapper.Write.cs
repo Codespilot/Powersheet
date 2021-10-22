@@ -161,7 +161,7 @@ namespace Nerosoft.Powersheet.Epplus
                     }
                     else if (mapper.ValueConverter != null)
                     {
-                        cellValue = mapper.ValueConverter.ConvertBack(sourceValue, CultureInfo.CurrentCulture);
+                        cellValue = mapper.ValueConverter.ConvertItemValue(sourceValue, CultureInfo.CurrentCulture);
                     }
                     else
                     {

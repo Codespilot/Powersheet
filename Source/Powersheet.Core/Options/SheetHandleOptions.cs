@@ -95,7 +95,7 @@ namespace Nerosoft.Powersheet
         /// <param name="columnName"></param>
         /// <param name="valueConverter"></param>
         /// <returns></returns>
-        public SheetHandleOptions AddMapProfile(string name, string columnName, ICellValueConverter valueConverter)
+        public SheetHandleOptions AddMapProfile(string name, string columnName, IValueConverter valueConverter)
         {
             return AddMapProfile(new SheetColumnMapProfile(name, columnName, valueConverter));
         }

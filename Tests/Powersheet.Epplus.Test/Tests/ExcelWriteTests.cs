@@ -115,7 +115,7 @@ namespace Nerosoft.Powersheet.Epplus.Test
                                                                  item.Property(t => t.Name).HasColumnName("姓名");
                                                                  item.Property(t => t.Gender)
                                                                      .HasColumnName("性别")
-                                                                     .HasValueConverter((value, _) =>
+                                                                     .HasItemValueConverter((value, _) =>
                                                                      {
                                                                          return value switch
                                                                          {
@@ -128,7 +128,7 @@ namespace Nerosoft.Powersheet.Epplus.Test
                                                                  item.Property(t => t.Age).HasColumnName("年龄");
                                                                  item.Property(t => t.Department).HasColumnName("部门");
                                                                  item.Property(t => t.IsActive).HasColumnName("是否在职")
-                                                                     .HasValueConverter((value, _) => IsActiveValueConvert(value));
+                                                                     .HasItemValueConverter((value, _) => IsActiveValueConvert(value));
                                                              })
                                                              .ConfigureOptions(options =>
                                                              {

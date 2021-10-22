@@ -107,7 +107,7 @@ namespace Nerosoft.Powersheet
 
         public string ColumnName { get; protected set; }
 
-        public Func<object, CultureInfo, object> ValueConverter { get; protected set; }
+        public IValueConverter ValueConverter { get; protected set; }
     }
 
     public class SheetItemProfileBuilder<TProperty> : SheetItemProfileBuilder
@@ -134,26 +134,39 @@ namespace Nerosoft.Powersheet
             return this;
         }
 
-        public SheetItemProfileBuilder<TProperty> HasValueConverter(Func<object, CultureInfo, TProperty> valueConvert)
+        public SheetItemProfileBuilder<TProperty> HasCellValueConverter(Func<object, CultureInfo, TProperty> valueConvert)
         {
-            ValueConverter = (cellValue, culture) => valueConvert(cellValue, culture);
+            ValueConverter ??= new EmptyValueConverter<TProperty>();
+
+            if (ValueConverter is EmptyValueConverter<TProperty> converter)
+            {
+                converter.SetCellValueConverter(valueConvert);
+            }
+
             return this;
         }
 
-        public SheetItemProfileBuilder<TProperty> HasValueConverter(Func<TProperty, CultureInfo, object> valueConvert)
+        public SheetItemProfileBuilder<TProperty> HasItemValueConverter(Func<TProperty, CultureInfo, object> valueConvert)
         {
-            ValueConverter = (cellValue, culture) => valueConvert((TProperty)cellValue, culture);
+            ValueConverter ??= new EmptyValueConverter<TProperty>();
+
+            if (ValueConverter is EmptyValueConverter<TProperty> converter)
+            {
+                converter.SetItemValueConverter(valueConvert);
+            }
+
             return this;
         }
 
-        public SheetItemProfileBuilder<TProperty> HasValueConverter(ICellValueConverter converter)
+        public SheetItemProfileBuilder<TProperty> HasValueConverter(IValueConverter converter)
         {
-            return HasValueConverter(converter.Convert);
+            ValueConverter = converter;
+            return this;
         }
 
-        public SheetItemProfileBuilder<TProperty> HasValueConverter(ICellValueConverter<TProperty> converter)
+        public SheetItemProfileBuilder<TProperty> HasValueConverter(IValueConverter<TProperty> converter)
         {
-            return HasValueConverter(converter.Convert);
+            return HasValueConverter((IValueConverter)converter);
         }
 
         public SheetItemProfileBuilder<TProperty> HasValueConverter(Type converterType)
@@ -163,12 +176,12 @@ namespace Nerosoft.Powersheet
                 throw new ArgumentNullException(nameof(converterType));
             }
 
-            if (converterType.IsSubclassOf(typeof(ICellValueConverter)))
+            if (converterType.IsSubclassOf(typeof(IValueConverter)))
             {
-                throw new InvalidOperationException($"The value converter must implements {nameof(ICellValueConverter)}.");
+                throw new InvalidOperationException($"The value converter must implements {nameof(IValueConverter)}.");
             }
 
-            var valueConverter = (ICellValueConverter)Activator.CreateInstance(converterType);
+            var valueConverter = (IValueConverter)Activator.CreateInstance(converterType);
             return HasValueConverter(valueConverter);
         }
 
