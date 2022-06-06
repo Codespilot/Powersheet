@@ -195,6 +195,21 @@ namespace Nerosoft.Powersheet
         /// <returns></returns>
         protected abstract List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName);
 
+        public abstract Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
+        
+        public abstract Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
+
+        public virtual async Task WriteAsync<T>(Stream stream, Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+        {
+            if (dataFactory == null)
+            {
+                throw new ArgumentNullException(nameof(dataFactory));
+            }
+
+            var data = await dataFactory();
+            await WriteAsync(stream, data, options, sheetName, cancellationToken);
+        }
+
         /// <inherited/>
         public abstract Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
 
