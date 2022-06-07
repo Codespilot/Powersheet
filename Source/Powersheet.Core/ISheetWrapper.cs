@@ -164,9 +164,11 @@ namespace Nerosoft.Powersheet
         /// <returns></returns>
         Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
 
-        Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
+        Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+            where T : class, new();
 
-        Task WriteAsync<T>(Stream stream, Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
+        Task WriteAsync<T>(Stream stream, Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+            where T : class, new();
 
         /// <summary>
         /// 将DataTable数据写入到表格并返回流。
