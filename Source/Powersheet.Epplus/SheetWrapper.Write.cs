@@ -16,6 +16,96 @@ namespace Nerosoft.Powersheet.Epplus
     public partial class SheetWrapper
     {
         /// <inherited/>
+        public override async Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+        {
+            options ??= new SheetWriteOptions();
+
+            options.Validate();
+
+            var columnsInDataTale = (from DataColumn column in data.Columns select column.ColumnName)
+                                    .Where(name => !options.IgnoreNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+                                    .ToList();
+
+            var mappers = new Dictionary<int, SheetColumnMapProfile>();
+
+            var excel = new ExcelPackage();
+            sheetName ??= "Sheet1";
+            var sheet = excel.Workbook.Worksheets.Add(sheetName);
+            for (var index = 0; index < columnsInDataTale.Count; index++)
+            {
+                var sheetColumnIndex = options.FirstColumnNumber + index;
+
+                var name = columnsInDataTale[index];
+
+                var mapper = options.GetMapProfile(name);
+                mapper ??= new SheetColumnMapProfile(name, name);
+
+                var cell = sheet.Cells[options.FirstColumnNumber, sheetColumnIndex];
+                cell.Value = mapper.ColumnName;
+                cell.SetCellStyle(options.HeaderStyle);
+
+                mappers.Add(sheetColumnIndex, mapper);
+            }
+
+            static object GetValue(DataRow dataRow, string name)
+            {
+                return dataRow[name];
+            }
+
+            Write(data.Rows.OfType<DataRow>(), sheet, options, mappers, GetValue);
+
+            await excel.SaveAsAsync(stream, cancellationToken);
+        }
+
+        /// <inherited/>
+        public override async Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+        {
+            options ??= new SheetWriteOptions();
+            options.Validate();
+            SetStyle<T>(options);
+
+            var properties = typeof(T).GetProperties();
+
+            var mappers = new Dictionary<int, SheetColumnMapProfile>();
+
+            var excel = new ExcelPackage();
+            sheetName ??= "Sheet1";
+            var sheet = excel.Workbook.Worksheets.Add(sheetName);
+
+            var index = 0;
+
+            foreach (var property in properties)
+            {
+                if (options.IgnoreNames.Contains(property.Name, StringComparer.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var sheetColumnIndex = options.FirstColumnNumber + index;
+
+                var name = property.Name;
+
+                var mapper = options.GetMapProfile(name);
+                mapper ??= new SheetColumnMapProfile(name, name);
+                var cell = sheet.Cells[options.FirstColumnNumber, sheetColumnIndex];
+                cell.Value = mapper.ColumnName;
+                cell.SetCellStyle(options.HeaderStyle);
+
+                mappers.Add(sheetColumnIndex, mapper);
+
+                index++;
+            }
+
+            object GetValue(T item, string name)
+            {
+                return properties.FirstOrDefault(t => t.Name == name)?.GetValue(item);
+            }
+
+            Write(data, sheet, options, mappers, GetValue);
+            await excel.SaveAsAsync(stream, cancellationToken);
+        }
+
+        /// <inherited/>
         public override async Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
         {
             options ??= new SheetWriteOptions();
@@ -67,7 +157,7 @@ namespace Nerosoft.Powersheet.Epplus
             options ??= new SheetWriteOptions();
             options.Validate();
             SetStyle<T>(options);
-            
+
             var properties = typeof(T).GetProperties();
 
             var mappers = new Dictionary<int, SheetColumnMapProfile>();
@@ -161,7 +251,7 @@ namespace Nerosoft.Powersheet.Epplus
                     }
                     else if (mapper.ValueConverter != null)
                     {
-                        cellValue = mapper.ValueConverter.ConvertBack(sourceValue, CultureInfo.CurrentCulture);
+                        cellValue = mapper.ValueConverter.ConvertItemValue(sourceValue, CultureInfo.CurrentCulture);
                     }
                     else
                     {

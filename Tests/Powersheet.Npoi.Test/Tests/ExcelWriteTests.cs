@@ -11,14 +11,14 @@ namespace Nerosoft.Powersheet.Npoi.Test
     public class ExcelWriteTests
     {
         private readonly ISheetWrapper _wrapper;
-        private static readonly string TempFileDirectory = Path.Combine(AppContext.BaseDirectory, "Temps");
+        private static readonly string _tempFileDirectory = Path.Combine(AppContext.BaseDirectory, "Temps");
 
         public ExcelWriteTests(ISheetWrapper wrapper)
         {
             _wrapper = wrapper;
-            if (!Directory.Exists(TempFileDirectory))
+            if (!Directory.Exists(_tempFileDirectory))
             {
-                Directory.CreateDirectory(TempFileDirectory);
+                Directory.CreateDirectory(_tempFileDirectory);
             }
         }
 
@@ -93,8 +93,8 @@ namespace Nerosoft.Powersheet.Npoi.Test
             using (stream)
             {
                 var buffer = new byte[stream.Length];
-                await stream.ReadAsync(buffer.AsMemory(0, buffer.Length));
-                await File.WriteAllBytesAsync(Path.Combine(TempFileDirectory, "TestWriteFromDataTableAsync_CN.xlsx"), buffer);
+                var _ = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length));
+                await File.WriteAllBytesAsync(Path.Combine(_tempFileDirectory, "TestWriteFromDataTableAsync_CN.xlsx"), buffer);
             }
         }
 
@@ -103,9 +103,9 @@ namespace Nerosoft.Powersheet.Npoi.Test
         {
             var employees = new List<Employee>
             {
-                new() {Name = "张三", Gender = 1, Age = 32, Birthdate = DateTime.Parse("1989/6/9"), Department = "研发部", IsActive = true},
-                new() {Name = "李四", Gender = 1, Age = 26, Birthdate = DateTime.Parse("1996/12/2"), Department = "销售部", IsActive = false},
-                new() {Name = "王小丫", Gender = 1, Age = 28, Birthdate = DateTime.Parse("1993/4/22"), Department = "法务部", IsActive = true}
+                new() { Name = "张三", Gender = 1, Age = 32, Birthdate = DateTime.Parse("1989/6/9"), Department = "研发部", IsActive = true },
+                new() { Name = "李四", Gender = 1, Age = 26, Birthdate = DateTime.Parse("1996/12/2"), Department = "销售部", IsActive = false },
+                new() { Name = "王小丫", Gender = 1, Age = 28, Birthdate = DateTime.Parse("1993/4/22"), Department = "法务部", IsActive = true }
             };
 
             var options = new SheetWriteOptions();
@@ -134,14 +134,14 @@ namespace Nerosoft.Powersheet.Npoi.Test
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Bold = true,
                 FillColor = Color.SeaGreen,
-                FontColor = Color.White, 
-                BorderColor = Color.Black, 
+                FontColor = Color.White,
+                BorderColor = Color.Black,
                 BorderStyle = BorderStyle.Thin
             };
-            
+
             options.BodyStyle = new CellStyle
             {
-                BorderColor = Color.Black, 
+                BorderColor = Color.Black,
                 BorderStyle = BorderStyle.Thin
             };
 
@@ -150,8 +150,8 @@ namespace Nerosoft.Powersheet.Npoi.Test
             using (stream)
             {
                 var buffer = new byte[stream.Length];
-                await stream.ReadAsync(buffer.AsMemory(0, buffer.Length));
-                await File.WriteAllBytesAsync(Path.Combine(TempFileDirectory, "TestWriteFromObjectListAsync_CN.xlsx"), buffer);
+                var _ = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length));
+                await File.WriteAllBytesAsync(Path.Combine(_tempFileDirectory, "TestWriteFromObjectListAsync_CN.xlsx"), buffer);
             }
         }
 

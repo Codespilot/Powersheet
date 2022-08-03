@@ -20,7 +20,8 @@
 支持DataTable、List&lt;T&gt;作为数据源。
 支持侵入和非侵入两种字段映射配置方式。</Description>
     <PackageTags>Excel, Spreadsheet, NPOI, EPPLUS</PackageTags>
-    <PackageReleaseNotes>1. 新增SheetHandleOptionsBuilder；</PackageReleaseNotes>
+    <PackageReleaseNotes>1. 数据写入到流；</PackageReleaseNotes>
+    <PackageVersion>2022.08.03</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
@@ -36,7 +37,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="NPOI" Version="2.5.4" />
+    <PackageReference Include="NPOI" Version="2.5.6" />
   </ItemGroup>
   
   <ItemGroup>
