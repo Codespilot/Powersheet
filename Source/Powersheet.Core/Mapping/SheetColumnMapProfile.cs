@@ -63,7 +63,7 @@ namespace Nerosoft.Powersheet
         /// <param name="name"></param>
         /// <param name="columnName"></param>
         /// <param name="valueConverter"></param>
-        public SheetColumnMapProfile(string name, string columnName, ICellValueConverter valueConverter)
+        public SheetColumnMapProfile(string name, string columnName, IValueConverter valueConverter)
             : this(name, columnName)
         {
             ValueConverter = valueConverter;
@@ -84,12 +84,12 @@ namespace Nerosoft.Powersheet
                 return;
             }
 
-            if (valueConverterType.IsSubclassOf(typeof(ICellValueConverter)))
+            if (valueConverterType.IsSubclassOf(typeof(IValueConverter)))
             {
-                throw new InvalidOperationException($"The value converter must implements {nameof(ICellValueConverter)}.");
+                throw new InvalidOperationException($"The value converter must implements {nameof(IValueConverter)}.");
             }
 
-            var valueConverter = (ICellValueConverter) Activator.CreateInstance(valueConverterType);
+            var valueConverter = (IValueConverter) Activator.CreateInstance(valueConverterType);
             ValueConverter = valueConverter;
         }
 
@@ -124,6 +124,6 @@ namespace Nerosoft.Powersheet
         /// 获取或设置单元格内容转换器。
         /// 如果同时设置列<see cref="ValueConvert"/>，此设置无效。
         /// </summary>
-        public ICellValueConverter ValueConverter { get; set; }
+        public IValueConverter ValueConverter { get; set; }
     }
 }

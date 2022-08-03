@@ -15,9 +15,9 @@ namespace Nerosoft.Powersheet
             Options = options;
         }
 
-        public SheetHandleOptions Options { get; }
+        protected SheetHandleOptions Options { get; }
 
-        public SheetHandleOptionsBuilder<TItem> ConfigureProfile(Action<SheetItemTypeBuilder<TItem>> buildAction)
+        protected SheetHandleOptionsBuilder<TItem> ConfigureProfile(Action<SheetItemTypeBuilder<TItem>> buildAction)
         {
             buildAction(_itemTypeBuilder);
             foreach (var profile in _itemTypeBuilder.Profiles)
@@ -31,6 +31,7 @@ namespace Nerosoft.Powersheet
                     Options.AddMapProfile(profile.PropertyName, profile.ColumnName, profile.ValueConverter);
                 }
             }
+
             return this;
         }
 
@@ -77,11 +78,11 @@ namespace Nerosoft.Powersheet
         }
     }
 
-    public class SheetItemTypeBuilder<TItem>
+    public sealed class SheetItemTypeBuilder<TItem>
     {
         private readonly Dictionary<string, SheetItemProfileBuilder> _profiles = new();
 
-        public virtual SheetItemProfileBuilder<TProperty> Property<TProperty>(Expression<Func<TItem, TProperty>> propertyExpression)
+        public SheetItemProfileBuilder<TProperty> Property<TProperty>(Expression<Func<TItem, TProperty>> propertyExpression)
         {
             var propertyName = propertyExpression.GetMemberAccess().Name;
             var builder = new SheetItemProfileBuilder<TProperty>(propertyName);
@@ -100,67 +101,94 @@ namespace Nerosoft.Powersheet
             ColumnName = propertyName;
         }
 
-        public SheetItemProfileBuilder Ignore()
+        public bool Ignored { get; protected set; }
+
+        public string PropertyName { get; }
+
+        public string ColumnName { get; protected set; }
+
+        public IValueConverter ValueConverter { get; protected set; }
+    }
+
+    public class SheetItemProfileBuilder<TProperty> : SheetItemProfileBuilder
+    {
+        internal SheetItemProfileBuilder(string propertyName)
+            : base(propertyName)
+        {
+        }
+
+        public SheetItemProfileBuilder<TProperty> Ignore()
         {
             Ignored = true;
             return this;
         }
 
-        public SheetItemProfileBuilder HasColumnName(string name)
+        public SheetItemProfileBuilder<TProperty> HasColumnName(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             ColumnName = name;
             return this;
         }
 
-        public SheetItemProfileBuilder HasValueConverter(Func<object, CultureInfo, object> valueConvert)
+        public SheetItemProfileBuilder<TProperty> HasCellValueConverter(Func<object, CultureInfo, TProperty> valueConvert)
         {
-            ValueConverter = valueConvert;
+            ValueConverter ??= new EmptyValueConverter<TProperty>();
+
+            if (ValueConverter is EmptyValueConverter<TProperty> converter)
+            {
+                converter.SetCellValueConverter(valueConvert);
+            }
+
             return this;
         }
 
-        public SheetItemProfileBuilder HasValueConverter(ICellValueConverter converter)
+        public SheetItemProfileBuilder<TProperty> HasItemValueConverter(Func<TProperty, CultureInfo, object> valueConvert)
         {
-            return HasValueConverter(converter.Convert);
+            ValueConverter ??= new EmptyValueConverter<TProperty>();
+
+            if (ValueConverter is EmptyValueConverter<TProperty> converter)
+            {
+                converter.SetItemValueConverter(valueConvert);
+            }
+
+            return this;
         }
 
-        public SheetItemProfileBuilder HasValueConverter(Type converterType)
+        public SheetItemProfileBuilder<TProperty> HasValueConverter(IValueConverter converter)
+        {
+            ValueConverter = converter;
+            return this;
+        }
+
+        public SheetItemProfileBuilder<TProperty> HasValueConverter(IValueConverter<TProperty> converter)
+        {
+            return HasValueConverter((IValueConverter)converter);
+        }
+
+        public SheetItemProfileBuilder<TProperty> HasValueConverter(Type converterType)
         {
             if (converterType == null)
             {
                 throw new ArgumentNullException(nameof(converterType));
             }
 
-            if (converterType.IsSubclassOf(typeof(ICellValueConverter)))
+            if (converterType.IsSubclassOf(typeof(IValueConverter)))
             {
-                throw new InvalidOperationException($"The value converter must implements {nameof(ICellValueConverter)}.");
+                throw new InvalidOperationException($"The value converter must implements {nameof(IValueConverter)}.");
             }
 
-            var valueConverter = (ICellValueConverter)Activator.CreateInstance(converterType);
+            var valueConverter = (IValueConverter)Activator.CreateInstance(converterType);
             return HasValueConverter(valueConverter);
         }
 
-        public SheetItemProfileBuilder HasValueConverter<TConverter>()
+        public SheetItemProfileBuilder<TProperty> HasValueConverter<TConverter>()
             where TConverter : class
         {
             return HasValueConverter(typeof(TConverter));
-
-        }
-
-        public bool Ignored { get; private set; }
-
-        public string PropertyName { get; }
-
-        public string ColumnName { get; private set; }
-
-        public Func<object, CultureInfo, object> ValueConverter { get; private set; }
-    }
-
-    public class SheetItemProfileBuilder<TProperty> : SheetItemProfileBuilder
-    {
-        public SheetItemProfileBuilder(string propertyName)
-            : base(propertyName)
-        {
         }
     }
-
 }

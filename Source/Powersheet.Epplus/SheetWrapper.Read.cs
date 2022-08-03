@@ -104,7 +104,7 @@ namespace Nerosoft.Powersheet.Epplus
                     }
                     else if (mapper.ValueConverter != null)
                     {
-                        value = mapper.ValueConverter.Convert(cellValue, CultureInfo.CurrentCulture);
+                        value = mapper.ValueConverter.ConvertCellValue(cellValue, CultureInfo.CurrentCulture);
                     }
                     else
                     {

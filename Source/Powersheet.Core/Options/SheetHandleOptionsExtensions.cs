@@ -47,7 +47,7 @@ namespace Nerosoft.Powersheet
         /// <param name="columnName"></param>
         /// <param name="valueConverter"></param>
         /// <returns></returns>
-        public static SheetHandleOptions AddMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, ICellValueConverter valueConverter)
+        public static SheetHandleOptions AddMapProfile<T>(this SheetHandleOptions options, Expression<Func<T, object>> nameExpression, string columnName, IValueConverter valueConverter)
         {
             var name = ExpressionHelper.GetPropertyName(nameExpression);
             return options.AddMapProfile(name, columnName, valueConverter);
