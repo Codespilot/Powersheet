@@ -125,7 +125,7 @@ namespace Nerosoft.Powersheet
         /// <param name="cancellationToken"></param>
         /// <typeparam name="T">结果对象类型</typeparam>
         /// <returns></returns>
-        Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object,  CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+        Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 读取指定单列数据到集合
@@ -164,9 +164,29 @@ namespace Nerosoft.Powersheet
         /// <returns></returns>
         Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// 将对象集合转换为表格后写入到流
+        /// </summary>
+        /// <param name="stream">目标流</param>
+        /// <param name="data">要写入到流的数据集合</param>
+        /// <param name="options">写入选项</param>
+        /// <param name="sheetName">表格名称</param>
+        /// <param name="cancellationToken">操作取消令牌</param>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <returns></returns>
         Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
             where T : class, new();
 
+        /// <summary>
+        /// 将对象集合转换为表格后写入到流
+        /// </summary>
+        /// <param name="stream">目标流</param>
+        /// <param name="dataFactory">取得要写入到流的数据集合的方法委托</param>
+        /// <param name="options">写入选项</param>
+        /// <param name="sheetName">表格名称</param>
+        /// <param name="cancellationToken">操作取消令牌</param>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <returns></returns>
         Task WriteAsync<T>(Stream stream, Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
             where T : class, new();
 
@@ -216,7 +236,7 @@ namespace Nerosoft.Powersheet
         /// <typeparam name="T">数据对象类型</typeparam>
         /// <returns></returns>
         Task<Stream> WriteAsync<T>(IEnumerable<T> data, int firstRowNumber, int columnNumber, string sheetName, Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default);
-        
+
         /// <summary>
         /// 将数据集合写入到表格的指定列并返回流
         /// </summary>
