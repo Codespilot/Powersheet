@@ -6,39 +6,38 @@ using Microsoft.Extensions.Hosting;
 using Nerosoft.Powersheet;
 using Nerosoft.Powersheet.Epplus;
 
-namespace Powersheet.Epplus.Test
+namespace Powersheet.Epplus.Test;
+
+[SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
+public class Startup
 {
-    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
-    [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-    public class Startup
+    public void ConfigureHost(IHostBuilder hostBuilder)
     {
-        public void ConfigureHost(IHostBuilder hostBuilder)
-        {
-            hostBuilder.ConfigureAppConfiguration(builder =>
-                       {
-                           builder.AddJsonFile("appsettings.json");
-                       })
-                       .ConfigureServices((_, services) =>
-                       {
-                           services.AddSingleton<ISheetWrapper, SheetWrapper>();
-                       });
-        }
+        hostBuilder.ConfigureAppConfiguration(builder =>
+                   {
+                       builder.AddJsonFile("appsettings.json");
+                   })
+                   .ConfigureServices((_, services) =>
+                   {
+                       services.AddSingleton<ISheetWrapper, SheetWrapper>();
+                   });
+    }
 
-        // ConfigureServices(IServiceCollection services)
-        // ConfigureServices(IServiceCollection services, HostBuilderContext hostBuilderContext)
-        // ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
-        public void ConfigureServices(IServiceCollection services, HostBuilderContext hostBuilderContext)
-        {
-        }
+    // ConfigureServices(IServiceCollection services)
+    // ConfigureServices(IServiceCollection services, HostBuilderContext hostBuilderContext)
+    // ConfigureServices(HostBuilderContext hostBuilderContext, IServiceCollection services)
+    public void ConfigureServices(IServiceCollection services, HostBuilderContext hostBuilderContext)
+    {
+    }
 
-        //public void Configure(IServiceProvider applicationServices, IIdGenerator idGenerator)
-        //{
-        //  InitData();
-        //}
+    //public void Configure(IServiceProvider applicationServices, IIdGenerator idGenerator)
+    //{
+    //  InitData();
+    //}
 
-        public void Configure(IServiceProvider applicationServices)
-        {
-            //var config = applicationServices.GetService<IConfiguration>();
-        }
+    public void Configure(IServiceProvider applicationServices)
+    {
+        //var config = applicationServices.GetService<IConfiguration>();
     }
 }
