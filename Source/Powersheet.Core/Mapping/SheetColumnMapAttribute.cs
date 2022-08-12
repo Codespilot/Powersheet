@@ -12,13 +12,15 @@ public class SheetColumnMapAttribute : Attribute
     /// 初始化一个新的 <see cref="SheetColumnMapAttribute"/> 实例
     /// </summary>
     public SheetColumnMapAttribute()
-    { }
+    {
+    }
 
     /// <summary>
     /// 初始化一个新的 <see cref="SheetColumnMapAttribute"/> 实例并传入<see cref="ColumnName"/>属性的值.
     /// </summary>
     /// <param name="name">表格内的列名</param>
     public SheetColumnMapAttribute(string name)
+        : this()
     {
         ColumnName = name;
     }

@@ -18,19 +18,47 @@ public abstract class SheetWrapperBase : ISheetWrapper
     /// <inherited/>
     public virtual async Task<DataTable> ReadToDataTableAsync(string file, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
     {
-        var stream = File.OpenRead(file);
-        return await ReadToDataTableAsync(stream, options, sheetIndex, cancellationToken);
+        return await ReadToDataTableAsync(file, options, new[] { sheetIndex }, cancellationToken);
     }
 
     /// <inherited/>
     public virtual async Task<DataTable> ReadToDataTableAsync(string file, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
     {
-        var stream = File.OpenRead(file);
-        return await ReadToDataTableAsync(stream, options, sheetName, cancellationToken);
+        return await ReadToDataTableAsync(file, options, new[] { sheetName }, cancellationToken);
+    }
+
+    /// <inherited/>
+    public virtual async Task<DataTable> ReadToDataTableAsync(string file, SheetReadOptions options, IEnumerable<int> sheets, CancellationToken cancellationToken = default)
+    {
+        using (var stream = File.OpenRead(file))
+        {
+            return await ReadToDataTableAsync(stream, options, sheets, cancellationToken);
+        }
+    }
+
+    /// <inherited/>
+    public virtual async Task<DataTable> ReadToDataTableAsync(string file, SheetReadOptions options, IEnumerable<string> sheets, CancellationToken cancellationToken = default)
+    {
+        using (var stream = File.OpenRead(file))
+        {
+            return await ReadToDataTableAsync(stream, options, sheets, cancellationToken);
+        }
     }
 
     /// <inherited/>
     public virtual async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
+    {
+        return await ReadToDataTableAsync(stream, options, new[] { sheetIndex }, cancellationToken);
+    }
+
+    /// <inherited/>
+    public virtual async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
+    {
+        return await ReadToDataTableAsync(stream, options, new[] { sheetName }, cancellationToken);
+    }
+
+    /// <inherited/>
+    public virtual async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, IEnumerable<int> sheets, CancellationToken cancellationToken = default)
     {
         return await Task.Run(() =>
         {
@@ -49,7 +77,7 @@ public abstract class SheetWrapperBase : ISheetWrapper
                 item[name] = value ?? DBNull.Value;
             }
 
-            var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheetIndex);
+            var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheets);
 
             foreach (var row in rows)
             {
@@ -61,7 +89,7 @@ public abstract class SheetWrapperBase : ISheetWrapper
     }
 
     /// <inherited/>
-    public virtual async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
+    public virtual async Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, IEnumerable<string> sheets, CancellationToken cancellationToken = default)
     {
         return await Task.Run(() =>
         {
@@ -80,7 +108,7 @@ public abstract class SheetWrapperBase : ISheetWrapper
                 item[name] = value ?? DBNull.Value;
             }
 
-            var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheetName);
+            var rows = Read(stream, options, MapperAction, () => table.NewRow(), ValueAction, sheets);
 
             foreach (var row in rows)
             {
@@ -95,20 +123,45 @@ public abstract class SheetWrapperBase : ISheetWrapper
     public virtual async Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
         where T : class, new()
     {
-        var stream = File.OpenRead(file);
-        return await ReadToListAsync<T>(stream, options, sheetIndex, cancellationToken);
+        return await ReadToListAsync<T>(file, options, new[] { sheetIndex }, cancellationToken);
+    }
+
+    /// <inherited/>
+    public virtual async Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, IEnumerable<int> sheets, CancellationToken cancellationToken = default)
+        where T : class, new()
+    {
+        using (var stream = File.OpenRead(file))
+        {
+            return await ReadToListAsync<T>(stream, options, sheets, cancellationToken);
+        }
     }
 
     /// <inherited/>
     public virtual async Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
         where T : class, new()
     {
-        var stream = File.OpenRead(file);
-        return await ReadToListAsync<T>(stream, options, sheetName, cancellationToken);
+        return await ReadToListAsync<T>(file, options, new[] { sheetName }, cancellationToken);
+    }
+
+    /// <inherited/>
+    public virtual async Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, IEnumerable<string> sheets, CancellationToken cancellationToken = default)
+        where T : class, new()
+    {
+        using (var stream = File.OpenRead(file))
+        {
+            return await ReadToListAsync<T>(stream, options, sheets, cancellationToken);
+        }
     }
 
     /// <inherited/>
     public virtual async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken = default)
+        where T : class, new()
+    {
+        return await ReadToListAsync<T>(stream, options, new[] { sheetIndex }, cancellationToken);
+    }
+
+    /// <inherited/>
+    public virtual async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, IEnumerable<int> sheets, CancellationToken cancellationToken = default)
         where T : class, new()
     {
         options ??= new SheetReadOptions();
@@ -123,7 +176,7 @@ public abstract class SheetWrapperBase : ISheetWrapper
 
         return await Task.Run(() =>
         {
-            var items = Read(stream, options, null, () => new T(), SetItemValue, sheetIndex);
+            var items = Read(stream, options, null, () => new T(), SetItemValue, sheets);
             return items;
         }, cancellationToken);
     }
@@ -132,6 +185,13 @@ public abstract class SheetWrapperBase : ISheetWrapper
     public virtual async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
         where T : class, new()
     {
+        return await ReadToListAsync<T>(stream, options, new[] { sheetName }, cancellationToken);
+    }
+
+    /// <inherited/>
+    public virtual async Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, IEnumerable<string> sheets, CancellationToken cancellationToken = default)
+        where T : class, new()
+    {
         options ??= new SheetReadOptions();
 
         options.Validate();
@@ -144,7 +204,7 @@ public abstract class SheetWrapperBase : ISheetWrapper
 
         return await Task.Run(() =>
         {
-            var items = Read(stream, options, null, () => new T(), SetItemValue, sheetName);
+            var items = Read(stream, options, null, () => new T(), SetItemValue, sheets);
             return items;
         }, cancellationToken);
     }
@@ -152,51 +212,57 @@ public abstract class SheetWrapperBase : ISheetWrapper
     /// <inherited/>
     public virtual async Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
     {
-        var stream = File.OpenRead(file);
-        return await ReadToListAsync(stream, firstRowNumber, columnNumber, sheetIndex, valueConvert, cancellationToken);
+        return await ReadToListAsync(file, firstRowNumber, columnNumber, new[] { sheetIndex }, valueConvert, cancellationToken);
     }
-
-    /// <inherited/>
-    public abstract Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
 
     /// <inherited/>
     public virtual async Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
     {
-        var stream = File.OpenRead(file);
-        return await ReadToListAsync(stream, firstRowNumber, columnNumber, sheetName, valueConvert, cancellationToken);
+        return await ReadToListAsync(file, firstRowNumber, columnNumber, new[] { sheetName }, valueConvert, cancellationToken);
     }
 
     /// <inherited/>
-    public abstract Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+    public virtual async Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, IEnumerable<int> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
+    {
+        using (var stream = File.OpenRead(file))
+        {
+            return await ReadToListAsync(stream, firstRowNumber, columnNumber, sheets, valueConvert, cancellationToken);
+        }
+    }
 
-    /// <summary>
-    /// 读取表格内容并按行转换为对象集合
-    /// </summary>
-    /// <param name="stream"></param>
-    /// <param name="options"></param>
-    /// <param name="mapperAction"></param>
-    /// <param name="itemAction"></param>
-    /// <param name="valueAction"></param>
-    /// <param name="sheetIndex"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    protected abstract List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, int sheetIndex = 0);
+    /// <inherited/>
+    public virtual async Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, IEnumerable<string> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
+    {
+        using (var stream = File.OpenRead(file))
+        {
+            return await ReadToListAsync(stream, firstRowNumber, columnNumber, sheets, valueConvert, cancellationToken);
+        }
+    }
 
-    /// <summary>
-    /// 读取表格内容并按行转换为对象集合
-    /// </summary>
-    /// <param name="stream"></param>
-    /// <param name="options"></param>
-    /// <param name="mapperAction"></param>
-    /// <param name="itemAction"></param>
-    /// <param name="valueAction"></param>
-    /// <param name="sheetName"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    protected abstract List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName);
+    /// <inherited/>
+    public virtual async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
+    {
+        return await ReadToListAsync(stream, firstRowNumber, columnNumber, new[] { sheetIndex }, valueConvert, cancellationToken);
+    }
+
+    /// <inherited/>
+    public virtual async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
+    {
+        return await ReadToListAsync(stream, firstRowNumber, columnNumber, new[] { sheetName }, valueConvert, cancellationToken);
+    }
+
+    /// <inherited/>
+    public abstract Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, IEnumerable<int> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+
+    /// <inherited/>
+    public abstract Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, IEnumerable<string> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+
+    protected abstract List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, IEnumerable<int> sheets);
+
+    protected abstract List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, IEnumerable<string> sheets);
 
     public abstract Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
-        
+
     public abstract Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
         where T : class, new();
 
@@ -379,5 +445,59 @@ public abstract class SheetWrapperBase : ISheetWrapper
         }
 
         property.SetValue(item, value);
+    }
+
+    protected virtual void CheckSheets(IEnumerable<int> sheets)
+    {
+        if (sheets == null)
+        {
+            throw new ArgumentNullException(nameof(sheets));
+        }
+
+        if (!sheets.Any())
+        {
+            throw new ArgumentException("Sheets is empty.", nameof(sheets));
+        }
+
+        if (sheets.Any(t => t < 0))
+        {
+            throw new IndexOutOfRangeException("The sheet index could not less than 0.");
+        }
+    }
+
+    protected virtual void CheckSheets(IEnumerable<int> sheets, int sheetCount)
+    {
+        if (sheets.Any(sheetIndex => sheetIndex >= sheetCount))
+        {
+            throw new IndexOutOfRangeException($"The sheet index could not greater than or equals the worksheet count ({sheetCount}).");
+        }
+    }
+
+    protected virtual void CheckSheets(IEnumerable<string> sheets)
+    {
+        if (sheets == null)
+        {
+            throw new ArgumentNullException(nameof(sheets));
+        }
+
+        if (!sheets.Any())
+        {
+            throw new ArgumentException("Sheets is empty.", nameof(sheets));
+        }
+
+        if (sheets.Any(string.IsNullOrEmpty))
+        {
+            throw new InvalidOperationException("The sheet name could not be null or empty.");
+        }
+    }
+
+    protected virtual void CheckSheets(IEnumerable<string> sheets, Func<IEnumerable<string>> getSheetNames)
+    {
+        var names = getSheetNames();
+        var notContainsSheets = sheets.Where(t => !names.Contains(t));
+        if (notContainsSheets.Any())
+        {
+            throw new SheetNotFoundException(string.Join(",", notContainsSheets), $"The workbook does not contains the sheet(s) named '{string.Join(",", notContainsSheets)}'");
+        }
     }
 }

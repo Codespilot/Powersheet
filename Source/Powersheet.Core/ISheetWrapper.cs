@@ -13,6 +13,8 @@ namespace Nerosoft.Powersheet;
 /// </summary>
 public interface ISheetWrapper
 {
+    #region ReadToDataTable
+
     /// <summary>
     /// 读取表格内容到<see cref="DataTable"/>。
     /// </summary>
@@ -54,6 +56,50 @@ public interface ISheetWrapper
     Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 读取多个表格内容到<see cref="DataTable"/>。
+    /// </summary>
+    /// <param name="file">文件路径</param>
+    /// <param name="options">配置选项</param>
+    /// <param name="sheets">表格位置索引，起始值为0</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<DataTable> ReadToDataTableAsync(string file, SheetReadOptions options, IEnumerable<int> sheets, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 读取表格内容到<see cref="DataTable"/>。
+    /// </summary>
+    /// <param name="file">文件路径</param>
+    /// <param name="options">配置选项</param>
+    /// <param name="sheets">表格名称，不指定取第一个</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<DataTable> ReadToDataTableAsync(string file, SheetReadOptions options, IEnumerable<string> sheets, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 读取多个表格内容到<see cref="DataTable"/>。
+    /// </summary>
+    /// <param name="stream">文件路径</param>
+    /// <param name="options">配置选项</param>
+    /// <param name="sheets">表格位置索引，起始值为0</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, IEnumerable<int> sheets, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 读取表格内容到<see cref="DataTable"/>。
+    /// </summary>
+    /// <param name="stream">文件路径</param>
+    /// <param name="options">配置选项</param>
+    /// <param name="sheets">表格名称，不指定取第一个</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, IEnumerable<string> sheets, CancellationToken cancellationToken = default);
+
+    #endregion
+
+    #region ReadToList
+
+    /// <summary>
     /// 读取表格内容到对象集合
     /// </summary>
     /// <param name="file">文件路径</param>
@@ -75,6 +121,30 @@ public interface ISheetWrapper
     /// <typeparam name="T">结果对象类型，必须是类且包含公开的无参构造器</typeparam>
     /// <returns></returns>
     Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, string sheetName, CancellationToken cancellationToken = default)
+        where T : class, new();
+
+    /// <summary>
+    /// 读取表格内容到对象集合
+    /// </summary>
+    /// <param name="file">文件路径</param>
+    /// <param name="options">配置选项</param>
+    /// <param name="sheets">表格位置索引，起始值为0</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">结果对象类型，必须是类且包含公开的无参构造器</typeparam>
+    /// <returns></returns>
+    Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, IEnumerable<int> sheets, CancellationToken cancellationToken = default)
+        where T : class, new();
+
+    /// <summary>
+    /// 读取表格内容到对象集合
+    /// </summary>
+    /// <param name="file">文件路径</param>
+    /// <param name="options"></param>
+    /// <param name="sheets">表格名称</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">结果对象类型，必须是类且包含公开的无参构造器</typeparam>
+    /// <returns></returns>
+    Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, IEnumerable<string> sheets, CancellationToken cancellationToken = default)
         where T : class, new();
 
     /// <summary>
@@ -102,6 +172,30 @@ public interface ISheetWrapper
         where T : class, new();
 
     /// <summary>
+    /// 读取表格内容到对象集合
+    /// </summary>
+    /// <param name="stream">文件流</param>
+    /// <param name="options">配置选项</param>
+    /// <param name="sheets">表格位置索引，起始值为0</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">结果对象类型，必须是类且包含公开的无参构造器</typeparam>
+    /// <returns></returns>
+    Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, IEnumerable<int> sheets, CancellationToken cancellationToken = default)
+        where T : class, new();
+
+    /// <summary>
+    /// 读取表格内容到对象集合
+    /// </summary>
+    /// <param name="stream">文件流</param>
+    /// <param name="options">配置选项</param>
+    /// <param name="sheets">表格名称</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">结果对象类型，必须是类且包含公开的无参构造器</typeparam>
+    /// <returns></returns>
+    Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, IEnumerable<string> sheets, CancellationToken cancellationToken = default)
+        where T : class, new();
+
+    /// <summary>
     /// 读取指定单列数据到集合
     /// </summary>
     /// <param name="file">文件路径</param>
@@ -113,19 +207,6 @@ public interface ISheetWrapper
     /// <typeparam name="T">结果对象类型</typeparam>
     /// <returns></returns>
     Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// 读取指定单列数据到集合
-    /// </summary>
-    /// <param name="stream">文件流</param>
-    /// <param name="firstRowNumber">起始行号，从1开始</param>
-    /// <param name="columnNumber">列号，起始值为1</param>
-    /// <param name="sheetIndex">表格位置索引，起始值为0</param>
-    /// <param name="valueConvert">值转换方法</param>
-    /// <param name="cancellationToken"></param>
-    /// <typeparam name="T">结果对象类型</typeparam>
-    /// <returns></returns>
-    Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 读取指定单列数据到集合
@@ -143,6 +224,45 @@ public interface ISheetWrapper
     /// <summary>
     /// 读取指定单列数据到集合
     /// </summary>
+    /// <param name="file">文件路径</param>
+    /// <param name="firstRowNumber">起始行号，从1开始</param>
+    /// <param name="columnNumber">列号，起始值为1</param>
+    /// <param name="sheets">表格位置索引，起始值为0</param>
+    /// <param name="valueConvert">值转换方法</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">结果对象类型</typeparam>
+    /// <returns></returns>
+    Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, IEnumerable<int> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 读取指定单列数据到集合
+    /// </summary>
+    /// <param name="file">文件路径</param>
+    /// <param name="firstRowNumber">起始行号，从1开始</param>
+    /// <param name="columnNumber">列号，起始值为1</param>
+    /// <param name="sheets">表格名称</param>
+    /// <param name="valueConvert">值转换方法</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">结果对象类型</typeparam>
+    /// <returns></returns>
+    Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, IEnumerable<string> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 读取指定单列数据到集合
+    /// </summary>
+    /// <param name="stream">文件流</param>
+    /// <param name="firstRowNumber">起始行号，从1开始</param>
+    /// <param name="columnNumber">列号，起始值为1</param>
+    /// <param name="sheetIndex">表格位置索引，起始值为0</param>
+    /// <param name="valueConvert">值转换方法</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">结果对象类型</typeparam>
+    /// <returns></returns>
+    Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 读取指定单列数据到集合
+    /// </summary>
     /// <param name="stream">文件流</param>
     /// <param name="firstRowNumber">起始行号，从1开始</param>
     /// <param name="columnNumber">列号，起始值为1</param>
@@ -152,6 +272,36 @@ public interface ISheetWrapper
     /// <typeparam name="T">结果对象类型</typeparam>
     /// <returns></returns>
     Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 读取指定单列数据到集合
+    /// </summary>
+    /// <param name="stream">文件流</param>
+    /// <param name="firstRowNumber">起始行号，从1开始</param>
+    /// <param name="columnNumber">列号，起始值为1</param>
+    /// <param name="sheets">表格位置索引</param>
+    /// <param name="valueConvert">值转换方法</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">结果对象类型</typeparam>
+    /// <returns></returns>
+    Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, IEnumerable<int> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 读取指定单列数据到集合
+    /// </summary>
+    /// <param name="stream">文件流</param>
+    /// <param name="firstRowNumber">起始行号，从1开始</param>
+    /// <param name="columnNumber">列号，起始值为1</param>
+    /// <param name="sheets">表格名称</param>
+    /// <param name="valueConvert">值转换方法</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">结果对象类型</typeparam>
+    /// <returns></returns>
+    Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, IEnumerable<string> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default);
+
+    #endregion
+
+    #region Write
 
     /// <summary>
     /// 将DataTable数据写入到流
@@ -249,4 +399,6 @@ public interface ISheetWrapper
     /// <typeparam name="T">数据对象类型</typeparam>
     /// <returns></returns>
     Task<Stream> WriteAsync<T>(Func<Task<IEnumerable<T>>> dataFactory, int firstRowNumber, int columnNumber, string sheetName, Func<T, CultureInfo, object> valueConvert = null, CancellationToken cancellationToken = default);
+
+    #endregion
 }

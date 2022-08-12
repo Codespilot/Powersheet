@@ -15,68 +15,126 @@ namespace Nerosoft.Powersheet.Npoi;
 /// </summary>
 public partial class SheetWrapper
 {
-    /// <inherited/>
-    public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
+    public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, IEnumerable<int> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
     {
+        CheckSheets(sheets);
+
         return await Task.Run(() =>
         {
-            var excel = new XSSFWorkbook(stream);
-            var sheet = excel.GetSheetAt(sheetIndex);
+            var workbook = new XSSFWorkbook(stream);
 
-            var result = new List<T>();
+            CheckSheets(sheets, workbook.NumberOfSheets);
 
-            for (var index = firstRowNumber; index < sheet.LastRowNum; index++)
+            return sheets.Aggregate(new List<T>(), (current, sheetIndex) =>
             {
-                var row = sheet.GetRow(index);
-
-                T value;
-
-                if (valueConvert != null)
-                {
-                    value = valueConvert(GetCellValue(row.GetCell(columnNumber, MissingCellPolicy.RETURN_NULL_AND_BLANK)), CultureInfo.CurrentCulture);
-                }
-                else
-                {
-                    value = (T) GetCellValue(row.GetCell(columnNumber), typeof(T));
-                }
-
-                result.Add(value);
-            }
-
-            return result;
+                var sheet = workbook.GetSheetAt(sheetIndex);
+                var items = Read(sheet, firstRowNumber, columnNumber, valueConvert);
+                current.AddRange(items);
+                return current;
+            });
         }, cancellationToken);
     }
 
-    /// <inherited/>
-    public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
+    public override async Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, IEnumerable<string> sheets, Func<object, CultureInfo, T> valueConvert = null, CancellationToken cancellationToken = default)
     {
+        CheckSheets(sheets);
+
         return await Task.Run(() =>
         {
-            var excel = new XSSFWorkbook(stream);
-            var sheet = excel.GetSheet(sheetName);
+            var workbook = new XSSFWorkbook(stream);
 
-            var result = new List<T>();
+            CheckSheets(sheets, () => GetSheetNames(workbook));
 
-            for (var index = firstRowNumber; index < sheet.LastRowNum; index++)
+            return sheets.Aggregate(new List<T>(), (current, sheetName) =>
             {
-                var row = sheet.GetRow(index);
+                var sheet = workbook.GetSheet(sheetName);
+                var items = Read(sheet, firstRowNumber, columnNumber, valueConvert);
+                current.AddRange(items);
+                return current;
+            });
+        }, cancellationToken);
+    }
 
-                T value;
+    /// <summary>
+    /// 读取表格内容并按行转换为对象集合
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="options"></param>
+    /// <param name="mapperAction"></param>
+    /// <param name="itemAction"></param>
+    /// <param name="valueAction"></param>
+    /// <param name="sheets"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="IndexOutOfRangeException"></exception>
+    protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, IEnumerable<int> sheets)
+    {
+        CheckSheets(sheets);
 
-                if (valueConvert != null)
-                {
-                    value = valueConvert(GetCellValue(row.GetCell(columnNumber, MissingCellPolicy.RETURN_NULL_AND_BLANK)), CultureInfo.CurrentCulture);
-                }
-                else
-                {
-                    value = (T) GetCellValue(row.GetCell(columnNumber), typeof(T));
-                }
+        var excel = new XSSFWorkbook(stream);
 
-                result.Add(value);
+        CheckSheets(sheets, excel.NumberOfSheets);
+
+        return sheets.Aggregate(new List<T>(), (current, sheetIndex) =>
+        {
+            var sheet = excel.GetSheetAt(sheetIndex);
+            var items = Read(sheet, options, mapperAction, itemAction, valueAction);
+            current.AddRange(items);
+            return current;
+        });
+    }
+
+    /// <summary>
+    /// 读取表格内容并按行转换为对象集合
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="options"></param>
+    /// <param name="mapperAction"></param>
+    /// <param name="itemAction"></param>
+    /// <param name="valueAction"></param>
+    /// <param name="sheets"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="SheetNotFoundException">指定的表格名称不存在时抛出此异常。</exception>
+    protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, IEnumerable<string> sheets)
+    {
+        CheckSheets(sheets);
+
+        var workbook = new XSSFWorkbook(stream);
+
+        CheckSheets(sheets, () => GetSheetNames(workbook));
+
+        return sheets.Aggregate(new List<T>(), (current, sheetName) =>
+        {
+            var sheet = workbook.GetSheet(sheetName);
+            var items = Read(sheet, options, mapperAction, itemAction, valueAction);
+            current.AddRange(items);
+            return current;
+        });
+    }
+
+    protected virtual List<T> Read<T>(ISheet sheet, int firstRowNumber, int columnNumber, Func<object, CultureInfo, T> valueConvert = null)
+    {
+        var result = new List<T>();
+        for (var index = firstRowNumber; index < sheet.LastRowNum; index++)
+        {
+            var row = sheet.GetRow(index);
+
+            T value;
+
+            if (valueConvert != null)
+            {
+                value = valueConvert(GetCellValue(row.GetCell(columnNumber, MissingCellPolicy.RETURN_NULL_AND_BLANK)), CultureInfo.CurrentCulture);
+            }
+            else
+            {
+                value = (T)GetCellValue(row.GetCell(columnNumber), typeof(T));
             }
 
-            return result;
-        }, cancellationToken);
+            result.Add(value);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -175,77 +233,6 @@ public partial class SheetWrapper
     }
 
     /// <summary>
-    /// 读取表格内容并按行转换为对象集合
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="stream"></param>
-    /// <param name="options"></param>
-    /// <param name="mapperAction"></param>
-    /// <param name="itemAction"></param>
-    /// <param name="valueAction"></param>
-    /// <param name="sheetIndex"></param>
-    /// <returns></returns>
-    protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, int sheetIndex = 0)
-    {
-        if (sheetIndex < 0)
-        {
-            throw new IndexOutOfRangeException("The sheet index could not less than 0.");
-        }
-
-        var excel = new XSSFWorkbook(stream);
-        if (sheetIndex >= excel.NumberOfSheets)
-        {
-            throw new IndexOutOfRangeException($"The sheet index could not larger than or equals the workbook sheet count ({excel.NumberOfNames}).");
-        }
-
-        var sheet = excel.GetSheetAt(sheetIndex);
-
-        return Read(sheet, options, mapperAction, itemAction, valueAction);
-    }
-
-    /// <summary>
-    /// 读取表格内容并按行转换为对象集合
-    /// </summary>
-    /// <param name="stream">数据流</param>
-    /// <param name="options">读取配置</param>
-    /// <param name="mapperAction"></param>
-    /// <param name="itemAction"></param>
-    /// <param name="valueAction"></param>
-    /// <param name="sheetName"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    /// <exception cref="SheetNotFoundException">指定的表格名称不存在时抛出此异常。</exception>
-    protected override List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, string sheetName)
-    {
-        var excel = new XSSFWorkbook(stream);
-        ISheet sheet;
-        if (!string.IsNullOrWhiteSpace(sheetName))
-        {
-            var names = GetSheetNames();
-            if (names.All(t => t.Equals(sheetName)))
-            {
-                throw new SheetNotFoundException(sheetName, $"The workbook does not contains a sheet named '{sheetName}'");
-            }
-
-            sheet = excel.GetSheet(sheetName);
-        }
-        else
-        {
-            sheet = excel.GetSheetAt(0);
-        }
-
-        return Read(sheet, options, mapperAction, itemAction, valueAction);
-
-        IEnumerable<string> GetSheetNames()
-        {
-            for (var index = 0; index < excel.NumberOfSheets; index++)
-            {
-                yield return excel.GetSheetName(index);
-            }
-        }
-    }
-
-    /// <summary>
     /// 获取单元格值
     /// </summary>
     /// <param name="cell"></param>
@@ -327,5 +314,13 @@ public partial class SheetWrapper
         }
 
         return cell.NumericCellValue;
+    }
+
+    private static IEnumerable<string> GetSheetNames(IWorkbook workbook)
+    {
+        for (var index = 0; index < workbook.NumberOfSheets; index++)
+        {
+            yield return workbook.GetSheetName(index);
+        }
     }
 }

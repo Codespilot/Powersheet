@@ -110,11 +110,10 @@ internal static class ExpressionHelper
 	{
 		var memberInfos = new List<TMemberInfo>();
 
-		MemberExpression memberExpression;
 		var unwrappedExpression = RemoveTypeAs(RemoveConvert(memberAccessExpression));
 		do
 		{
-			memberExpression = unwrappedExpression as MemberExpression;
+			var memberExpression = unwrappedExpression as MemberExpression;
 
 			if (memberExpression?.Member is not TMemberInfo memberInfo)
 			{
