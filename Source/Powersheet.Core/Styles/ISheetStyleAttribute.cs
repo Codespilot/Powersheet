@@ -1,7 +1,6 @@
-namespace Nerosoft.Powersheet
+namespace Nerosoft.Powersheet;
+
+public interface ISheetStyleAttribute
 {
-    public interface ISheetStyleAttribute
-    {
-        void SetStyle(CellStyle style);
-    }
+    void SetStyle(CellStyle style);
 }
