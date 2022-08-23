@@ -6,8 +6,8 @@
     <Authors>damon</Authors>
     <Company>Nerosoft Co., Ltd.</Company>
     <Product>Powersheet</Product>
-    <Version>2021.10.13</Version>
-    <Copyright>©2018-2021 Nerosoft. All Rights Reserved.</Copyright>
+    <Version>2022.08.23</Version>
+    <Copyright>©2018-2022 Nerosoft. All Rights Reserved.</Copyright>
     <LangVersion>latest</LangVersion>
     <Title>Powersheet EPPLUS implementation.</Title>
     <PackageProjectUrl>https://github.com/realzhaorong/Powersheet</PackageProjectUrl>
@@ -20,8 +20,7 @@
 支持DataTable、List&lt;T&gt;作为数据源。
 支持侵入和非侵入两种字段映射配置方式。</Description>
     <PackageTags>Excel, Spreadsheet, NPOI, EPPLUS</PackageTags>
-    <PackageReleaseNotes>1. 数据写入到流；</PackageReleaseNotes>
-    <PackageVersion>2022.08.03</PackageVersion>
+    <PackageReleaseNotes>1. 支持同时读取多个表格数据；</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
