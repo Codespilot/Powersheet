@@ -1,72 +1,73 @@
-namespace Nerosoft.Powersheet;
-
-/// <summary>
-/// 单元格边框样式
-/// </summary>
-public enum BorderStyle
+namespace Nerosoft.Powersheet
 {
     /// <summary>
-    /// No border
+    /// 单元格边框样式
     /// </summary>
-    None,
+    public enum BorderStyle
+    {
+        /// <summary>
+        /// No border
+        /// </summary>
+        None,
 
-    /// <summary>
-    /// Thin border
-    /// </summary>
-    Thin,
+        /// <summary>
+        /// Thin border
+        /// </summary>
+        Thin,
 
-    /// <summary>
-    /// Medium border
-    /// </summary>
-    Medium,
+        /// <summary>
+        /// Medium border
+        /// </summary>
+        Medium,
 
-    /// <summary>
-    /// dash border
-    /// </summary>
-    Dashed,
+        /// <summary>
+        /// dash border
+        /// </summary>
+        Dashed,
 
-    /// <summary>
-    /// dot border
-    /// </summary>
-    Dotted,
+        /// <summary>
+        /// dot border
+        /// </summary>
+        Dotted,
 
-    /// <summary>
-    /// Thick border
-    /// </summary>
-    Thick,
+        /// <summary>
+        /// Thick border
+        /// </summary>
+        Thick,
 
-    /// <summary>
-    /// double-line border
-    /// </summary>
-    Double,
+        /// <summary>
+        /// double-line border
+        /// </summary>
+        Double,
 
-    /// <summary>
-    /// hair-line border
-    /// </summary>
-    Hair,
+        /// <summary>
+        /// hair-line border
+        /// </summary>
+        Hair,
 
-    /// <summary>
-    /// Medium dashed border
-    /// </summary>
-    MediumDashed,
+        /// <summary>
+        /// Medium dashed border
+        /// </summary>
+        MediumDashed,
 
-    /// <summary>
-    /// dash-dot border
-    /// </summary>
-    DashDot,
+        /// <summary>
+        /// dash-dot border
+        /// </summary>
+        DashDot,
 
-    /// <summary>
-    /// medium dash-dot border
-    /// </summary>
-    MediumDashDot,
+        /// <summary>
+        /// medium dash-dot border
+        /// </summary>
+        MediumDashDot,
 
-    /// <summary>
-    /// dash-dot-dot border
-    /// </summary>
-    DashDotDot,
+        /// <summary>
+        /// dash-dot-dot border
+        /// </summary>
+        DashDotDot,
 
-    /// <summary>
-    /// medium dash-dot-dot border
-    /// </summary>
-    MediumDashDotDot
+        /// <summary>
+        /// medium dash-dot-dot border
+        /// </summary>
+        MediumDashDotDot
+    }
 }

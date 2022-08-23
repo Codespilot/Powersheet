@@ -3,147 +3,148 @@ using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Nerosoft.Powersheet.Npoi.Test;
-
-public class ExcelReadTests
+namespace Nerosoft.Powersheet.Npoi.Test
 {
-    private readonly ISheetWrapper _wrapper;
-
-    public ExcelReadTests(ISheetWrapper wrapper)
+    public class ExcelReadTests
     {
-        _wrapper = wrapper;
-    }
+        private readonly ISheetWrapper _wrapper;
 
-    [Fact]
-    public async Task TestReadToDataTableAsync_CN()
-    {
-        var file = Path.Combine(AppContext.BaseDirectory, "Samples", "Employees.CN.xlsx");
-
-        var options = new SheetReadOptions();
-
-        options.AddMapProfile("Name", "姓名");
-        options.AddMapProfile("Gender", "性别", (value, _) =>
+        public ExcelReadTests(ISheetWrapper wrapper)
         {
-            if (value is string gender)
+            _wrapper = wrapper;
+        }
+
+        [Fact]
+        public async Task TestReadToDataTableAsync_CN()
+        {
+            var file = Path.Combine(AppContext.BaseDirectory, "Samples", "Employees.CN.xlsx");
+
+            var options = new SheetReadOptions();
+
+            options.AddMapProfile("Name", "姓名");
+            options.AddMapProfile("Gender", "性别", (value, _) =>
             {
-                return gender switch
+                if (value is string gender)
                 {
+                    return gender switch
+                    {
+                        "男" => 1,
+                        "女" => 2,
+                        _ => 0
+                    };
+                }
+
+                return value;
+            });
+            options.AddMapProfile("Age", "年龄");
+            options.AddMapProfile("Birthdate", "出生日期");
+            options.AddMapProfile("Department", "部门");
+            options.AddMapProfile("IsActive", "是否在职", (value, _) => IsActiveValueConvert(value));
+
+            var datatable = await _wrapper.ReadToDataTableAsync(file, options, 0);
+            Assert.Equal(3, datatable.Rows.Count);
+        }
+
+        [Fact]
+        public async Task TestReadToListAsync_CN()
+        {
+            var file = Path.Combine(AppContext.BaseDirectory, "Samples", "Employees.CN.xlsx");
+
+            var options = new SheetReadOptions();
+
+            options.AddMapProfile("Id", "编号");
+            options.AddMapProfile("Name", "姓名");
+            options.AddMapProfile("Gender", "性别", (value, _) =>
+            {
+                return value switch
+                {
+                    null => 0,
                     "男" => 1,
                     "女" => 2,
                     _ => 0
                 };
-            }
+            });
+            options.AddMapProfile("Age", "年龄");
+            options.AddMapProfile("Birthdate", "出生日期");
+            options.AddMapProfile("Department", "部门");
+            options.AddMapProfile("IsActive", "是否在职", (value, _) => IsActiveValueConvert(value));
 
-            return value;
-        });
-        options.AddMapProfile("Age", "年龄");
-        options.AddMapProfile("Birthdate", "出生日期");
-        options.AddMapProfile("Department", "部门");
-        options.AddMapProfile("IsActive", "是否在职", (value, _) => IsActiveValueConvert(value));
-
-        var datatable = await _wrapper.ReadToDataTableAsync(file, options, 0);
-        Assert.Equal(3, datatable.Rows.Count);
-    }
-
-    [Fact]
-    public async Task TestReadToListAsync_CN()
-    {
-        var file = Path.Combine(AppContext.BaseDirectory, "Samples", "Employees.CN.xlsx");
-
-        var options = new SheetReadOptions();
-
-        options.AddMapProfile("Id", "编号");
-        options.AddMapProfile("Name", "姓名");
-        options.AddMapProfile("Gender", "性别", (value, _) =>
-        {
-            return value switch
-            {
-                null => 0,
-                "男" => 1,
-                "女" => 2,
-                _ => 0
-            };
-        });
-        options.AddMapProfile("Age", "年龄");
-        options.AddMapProfile("Birthdate", "出生日期");
-        options.AddMapProfile("Department", "部门");
-        options.AddMapProfile("IsActive", "是否在职", (value, _) => IsActiveValueConvert(value));
-
-        var result = await _wrapper.ReadToListAsync<Employee>(file, options, 0);
-        Assert.Equal(3, result.Count);
-    }
+            var result = await _wrapper.ReadToListAsync<Employee>(file, options, 0);
+            Assert.Equal(3, result.Count);
+        }
         
-    [Fact]
-    public async Task TestReadToListAsync_CN_InvasiveMap()
-    {
-        var file = Path.Combine(AppContext.BaseDirectory, "Samples", "Employees.CN.xlsx");
+        [Fact]
+        public async Task TestReadToListAsync_CN_InvasiveMap()
+        {
+            var file = Path.Combine(AppContext.BaseDirectory, "Samples", "Employees.CN.xlsx");
 
-        var options = new SheetReadOptions();
+            var options = new SheetReadOptions();
 
-        options.AddMapProfile("Id", "编号");
-        options.AddMapProfile("Gender", "性别", (value, _) =>
+            options.AddMapProfile("Id", "编号");
+            options.AddMapProfile("Gender", "性别", (value, _) =>
+            {
+                return value switch
+                {
+                    null => 0,
+                    "男" => 1,
+                    "女" => 2,
+                    _ => 0
+                };
+            });
+            options.AddMapProfile("Age", "年龄");
+            options.AddMapProfile("Birthdate", "出生日期");
+            options.AddMapProfile("IsActive", "是否在职", (value, _) => IsActiveValueConvert(value));
+
+            var result = await _wrapper.ReadToListAsync<EmployeeInvasiveMap>(file, options, 0);
+            Assert.Equal(3, result.Count);
+        }
+
+        private static bool IsActiveValueConvert(object value)
         {
             return value switch
             {
-                null => 0,
-                "男" => 1,
-                "女" => 2,
-                _ => 0
+                "是" => true,
+                "否" => false,
+                "在职" => true,
+                "离职" => false,
+                _ => false
             };
-        });
-        options.AddMapProfile("Age", "年龄");
-        options.AddMapProfile("Birthdate", "出生日期");
-        options.AddMapProfile("IsActive", "是否在职", (value, _) => IsActiveValueConvert(value));
-
-        var result = await _wrapper.ReadToListAsync<EmployeeInvasiveMap>(file, options, 0);
-        Assert.Equal(3, result.Count);
+        }
     }
 
-    private static bool IsActiveValueConvert(object value)
+    public class Employee
     {
-        return value switch
-        {
-            "是" => true,
-            "否" => false,
-            "在职" => true,
-            "离职" => false,
-            _ => false
-        };
+        public Guid Id { get; set; }
+
+        public string Name { get; set; }
+
+        public int Gender { get; set; }
+
+        public int Age { get; set; }
+
+        public DateTime Birthdate { get; set; }
+
+        public string Department { get; set; }
+
+        public bool IsActive { get; set; }
     }
-}
-
-public class Employee
-{
-    public Guid Id { get; set; }
-
-    public string Name { get; set; }
-
-    public int Gender { get; set; }
-
-    public int Age { get; set; }
-
-    public DateTime Birthdate { get; set; }
-
-    public string Department { get; set; }
-
-    public bool IsActive { get; set; }
-}
     
-public class EmployeeInvasiveMap
-{
-    public Guid Id { get; set; }
+    public class EmployeeInvasiveMap
+    {
+        public Guid Id { get; set; }
 
-    [SheetColumnMap("姓名")]
-    public string Name { get; set; }
+        [SheetColumnMap("姓名")]
+        public string Name { get; set; }
 
-    public int Gender { get; set; }
+        public int Gender { get; set; }
 
-    public int Age { get; set; }
+        public int Age { get; set; }
 
-    public DateTime Birthdate { get; set; }
+        public DateTime Birthdate { get; set; }
 
-    [SheetColumnMap("部门")]
-    public string Department { get; set; }
+        [SheetColumnMap("部门")]
+        public string Department { get; set; }
 
-    public bool IsActive { get; set; }
+        public bool IsActive { get; set; }
+    }
 }
