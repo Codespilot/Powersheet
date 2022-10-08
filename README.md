@@ -162,3 +162,9 @@ Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNu
 > 3. columnNumber - 列号，起始值为1
 > 4. sheetName - 表格名称，不指定取第一个
 > 5. valueConvert - 值转换方法
+
+---
+
+[![JetBrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/)
+
+Thanks to [JetBrains](https://www.jetbrains.com/) for supporting the project through [All Products Packs](https://www.jetbrains.com/products.html) within their [Free Open Source License](https://www.jetbrains.com/community/opensource) program.
