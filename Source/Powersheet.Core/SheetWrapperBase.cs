@@ -261,9 +261,24 @@ namespace Nerosoft.Powersheet
 
         protected abstract List<T> Read<T>(Stream stream, SheetReadOptions options, Action<Dictionary<int, SheetColumnMapProfile>> mapperAction, Func<T> itemAction, Action<T, string, object> valueAction, IEnumerable<string> sheets);
 
-        public abstract Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
+        /// <inherited/>
+        public virtual async Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+        {
+            await WriteAsync(stream, data, options, sheetName, 0, cancellationToken);
+        }
 
-        public abstract Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+        /// <inherited/>
+        public abstract Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default);
+
+        /// <inherited/>
+        public virtual async Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+            where T : class, new()
+        {
+            await WriteAsync(stream, data, options, sheetName, 0, cancellationToken);
+        }
+
+        /// <inherited/>
+        public abstract Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default)
             where T : class, new();
 
         public virtual async Task WriteAsync<T>(Stream stream, Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
@@ -279,13 +294,47 @@ namespace Nerosoft.Powersheet
         }
 
         /// <inherited/>
-        public abstract Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
+        public virtual async Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+        {
+            return await WriteAsync(data, options, sheetName, 0, cancellationToken);
+        }
 
         /// <inherited/>
-        public abstract Task<Stream> WriteAsync<T>(IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default) where T : class, new();
+        public virtual async Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default)
+        {
+            var stream = new MemoryStream();
+            await WriteAsync(stream, data, options, sheetName, itemsPerSheet, cancellationToken);
+            stream.Position = 0;
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
+
+        /// <inherited/>
+        public virtual async Task<Stream> WriteAsync<T>(IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+            where T : class, new()
+        {
+            return await WriteAsync(data, options, sheetName, 0, cancellationToken);
+        }
+
+        /// <inherited/>
+        public virtual async Task<Stream> WriteAsync<T>(IEnumerable<T> data, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default)
+            where T : class, new()
+        {
+            var stream = new MemoryStream();
+            await WriteAsync(stream, data, options, sheetName, itemsPerSheet, cancellationToken);
+            stream.Position = 0;
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
 
         /// <inherited/>
         public virtual async Task<Stream> WriteAsync<T>(Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+            where T : class, new()
+        {
+            return await WriteAsync(dataFactory, options, sheetName, 0, cancellationToken);
+        }
+
+        public virtual async Task<Stream> WriteAsync<T>(Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default)
             where T : class, new()
         {
             if (dataFactory == null)
@@ -294,7 +343,7 @@ namespace Nerosoft.Powersheet
             }
 
             var data = await dataFactory();
-            return await WriteAsync(data, options, sheetName, cancellationToken);
+            return await WriteAsync(data, options, sheetName, itemsPerSheet, cancellationToken);
         }
 
         /// <inherited/>
@@ -499,6 +548,105 @@ namespace Nerosoft.Powersheet
             {
                 throw new SheetNotFoundException(string.Join(",", notContainsSheets), $"The workbook does not contains the sheet(s) named '{string.Join(",", notContainsSheets)}'");
             }
+        }
+
+        /// <summary>
+        /// 从DataTable获取列映射配置
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="options"></param>
+        /// <param name="zeroBasedColumnIndex"></param>
+        /// <returns></returns>
+        protected virtual Dictionary<int, SheetColumnMapProfile> GetColumnMapProfiles(DataTable data, SheetWriteOptions options, bool zeroBasedColumnIndex)
+        {
+            return GetColumnMapProfiles(data.Columns, options, zeroBasedColumnIndex);
+        }
+
+        protected virtual Dictionary<int, SheetColumnMapProfile> GetColumnMapProfiles(DataColumnCollection columns, SheetWriteOptions options, bool zeroBasedColumnIndex)
+        {
+            var columnsInDataTale = (from DataColumn column in columns select column.ColumnName)
+                                    .Where(name => !options.IgnoreNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+                                    .ToList();
+
+            var mappers = new Dictionary<int, SheetColumnMapProfile>();
+
+            for (var index = 0; index < columnsInDataTale.Count; index++)
+            {
+                var sheetColumnIndex = options.FirstColumnNumber + index - (zeroBasedColumnIndex ? 1 : 0);
+
+                var name = columnsInDataTale[index];
+
+                var mapper = options.GetMapProfile(name);
+                mapper ??= new SheetColumnMapProfile(name, name);
+
+                mappers.Add(sheetColumnIndex, mapper);
+            }
+
+            return mappers;
+        }
+
+        protected virtual Dictionary<int, SheetColumnMapProfile> GetColumnMapProfiles<T>(SheetWriteOptions options, bool zeroBasedColumnIndex)
+        {
+            return GetColumnMapProfiles(typeof(T), options, zeroBasedColumnIndex);
+        }
+
+        protected virtual Dictionary<int, SheetColumnMapProfile> GetColumnMapProfiles(Type type, SheetWriteOptions options, bool zeroBasedColumnIndex)
+        {
+            var properties = type.GetProperties();
+
+            var mappers = new Dictionary<int, SheetColumnMapProfile>();
+
+            int index = 0;
+            foreach (var property in properties)
+            {
+                if (options.IgnoreNames.Contains(property.Name, StringComparer.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var sheetColumnIndex = options.FirstColumnNumber + index - (zeroBasedColumnIndex ? 1 : 0);
+
+                var name = property.Name;
+                var mapper = options.GetMapProfile(name);
+                mapper ??= new SheetColumnMapProfile(name, name);
+
+                mappers.Add(sheetColumnIndex, mapper);
+
+                index++;
+            }
+
+            return mappers;
+        }
+
+        protected virtual object GetValue(DataRow row, string name)
+        {
+            return row[name];
+        }
+
+        protected virtual object GetValue<T>(T item, string name)
+        {
+            if (item is DataRow row)
+            {
+                return row[name];
+            }
+
+            return typeof(T).GetProperty(name)?.GetValue(item);
+        }
+
+        protected virtual int GetSheetCount(int totalCount, ref int itemsPerSheet)
+        {
+            if (itemsPerSheet <= 0)
+            {
+                itemsPerSheet = int.MaxValue;
+            }
+
+            var sheetCount = totalCount / itemsPerSheet;
+            if (totalCount % itemsPerSheet > 0)
+            {
+                sheetCount += 1;
+            }
+
+            return sheetCount;
         }
     }
 }

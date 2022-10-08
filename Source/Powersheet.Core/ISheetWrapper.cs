@@ -315,6 +315,18 @@ namespace Nerosoft.Powersheet
         Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// 将DataTable数据写入到流
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="data"></param>
+        /// <param name="options"></param>
+        /// <param name="sheetName"></param>
+        /// <param name="itemsPerSheet"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task WriteAsync(Stream stream, DataTable data, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// 将对象集合转换为表格后写入到流
         /// </summary>
         /// <param name="stream">目标流</param>
@@ -325,6 +337,20 @@ namespace Nerosoft.Powersheet
         /// <typeparam name="T">对象类型</typeparam>
         /// <returns></returns>
         Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+            where T : class, new();
+
+        /// <summary>
+        /// 将对象集合转换为表格后写入到流
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stream"></param>
+        /// <param name="data"></param>
+        /// <param name="options"></param>
+        /// <param name="sheetName"></param>
+        /// <param name="itemsPerSheet"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task WriteAsync<T>(Stream stream, IEnumerable<T> data, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default)
             where T : class, new();
 
         /// <summary>
@@ -343,12 +369,23 @@ namespace Nerosoft.Powersheet
         /// <summary>
         /// 将DataTable数据写入到表格并返回流。
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="data">数据集合</param>
         /// <param name="options">配置选项</param>
         /// <param name="sheetName">表格名称，不指定取第一个</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// 将DataTable数据写入到表格并返回流。
+        /// </summary>
+        /// <param name="data">数据集合</param>
+        /// <param name="options">配置选项</param>
+        /// <param name="sheetName">表格名称，不指定取第一个</param>
+        /// <param name="itemsPerSheet">每个表格写入的行数</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Stream> WriteAsync(DataTable data, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 将对象写入到表格并返回流。
@@ -361,6 +398,19 @@ namespace Nerosoft.Powersheet
         /// <returns></returns>
         Task<Stream> WriteAsync<T>(IEnumerable<T> data, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
             where T : class, new();
+        
+        /// <summary>
+        /// 将对象写入到表格并返回流。
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="options"></param>
+        /// <param name="sheetName"></param>
+        /// <param name="itemsPerSheet"></param>
+        /// <param name="cancellationToken"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Task<Stream> WriteAsync<T>(IEnumerable<T> data, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default)
+            where T : class, new();
 
         /// <summary>
         /// 将对象写入到表格并返回流
@@ -372,6 +422,19 @@ namespace Nerosoft.Powersheet
         /// <typeparam name="T">数据对象类型</typeparam>
         /// <returns></returns>
         Task<Stream> WriteAsync<T>(Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, CancellationToken cancellationToken = default)
+            where T : class, new();
+        
+        /// <summary>
+        /// 将对象写入到表格并返回流
+        /// </summary>
+        /// <param name="dataFactory"></param>
+        /// <param name="options"></param>
+        /// <param name="sheetName"></param>
+        /// <param name="itemsPerSheet"></param>
+        /// <param name="cancellationToken"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Task<Stream> WriteAsync<T>(Func<Task<IEnumerable<T>>> dataFactory, SheetWriteOptions options, string sheetName, int itemsPerSheet, CancellationToken cancellationToken = default)
             where T : class, new();
 
         /// <summary>

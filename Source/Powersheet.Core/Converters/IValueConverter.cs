@@ -50,6 +50,7 @@ namespace Nerosoft.Powersheet
             _itemValueConverter = converter;
         }
 
+        /// <inheritdoc />
         public TValue ConvertCellValue(object value, CultureInfo culture)
         {
             if (_cellValueConverter == null)
@@ -60,6 +61,7 @@ namespace Nerosoft.Powersheet
             return _cellValueConverter(value, culture);
         }
 
+        /// <inheritdoc />
         public object ConvertItemValue(TValue value, CultureInfo culture)
         {
             if (_itemValueConverter == null)
