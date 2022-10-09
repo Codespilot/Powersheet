@@ -163,6 +163,14 @@ Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNu
 > 4. sheetName - 表格名称，不指定取第一个
 > 5. valueConvert - 值转换方法
 
+## 协议
+
+本项目采用 Apache-2.0 协议，可查看 [LICENSE](https://github.com/realzhaorong/Powersheet/blob/master/LICENSE) 了解更详细内容。
+
+## 联系我们
+
+如果您需要向我们反馈 Bug、提供产品意见，可以创建一个 [Github issue](https://github.com/realzhaorong/Powersheet/issues) 联系我们，非常感谢！
+
 ---
 
 [![JetBrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/)
