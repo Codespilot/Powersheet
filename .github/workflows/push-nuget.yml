@@ -1,0 +1,36 @@
+name: .NET
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Publish NuGet Powersheet.Core
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        PROJECT_FILE_PATH: Source/Powersheet.Core/Powersheet.Core.csproj
+        NUGET_KEY: ${{secrets.NUGET_API}}
+    - name: Publish NuGet Powersheet.Npoi
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        PROJECT_FILE_PATH: Source/Powersheet.Npoi/Powersheet.Npoi.csproj
+        NUGET_KEY: ${{secrets.NUGET_API}}
+    - name: Publish NuGet Powersheet.Epplus
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        PROJECT_FILE_PATH: Source/Powersheet.Epplus/Powersheet.Epplus.csproj
+        NUGET_KEY: ${{secrets.NUGET_API}}

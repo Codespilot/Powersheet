@@ -176,3 +176,6 @@ Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNu
 [![JetBrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/)
 
 Thanks to [JetBrains](https://www.jetbrains.com/) for supporting the project through [All Products Packs](https://www.jetbrains.com/products.html) within their [Free Open Source License](https://www.jetbrains.com/community/opensource) program.
+
+---
+![Alt](https://repobeats.axiom.co/api/embed/eff3327d99d2da5a87ff59600720befd793cff06.svg "Repobeats analytics image")
