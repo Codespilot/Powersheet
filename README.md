@@ -34,6 +34,15 @@ dotnet add package Powersheet.Npoi
 dotnet add package Powersheet.Epplus 
 ```
 
+Script & Interactive
+```shell
+#r "nuget: Powersheet.Core"
+
+#r "nuget: Powersheet.Npoi"
+
+#r "nuget: Powersheet.Epplus"
+```
+
 ### 配置依赖注入
 
 使用Microsoft.Extensions.DependencyInjection
@@ -60,82 +69,113 @@ builder.RegisterType<SheetWrapper>().As<ISheetWrapper>().SingleInstance();
 
 ```csharp
 Task<DataTable> ReadToDataTableAsync(string file, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken);
-1. file - 文件路径
-2. options - 配置选项
-3. sheetIndex - 表格位置索引，起始值为0
-  
-Task<DataTable> ReadToDataTableAsync(string file, SheetReadOptions options, string sheetName, CancellationToken cancellationToken);
-1. file - 文件路径
-2. options - 配置选项
-3. sheetName - 表格名称，不指定取第一个
-  
-Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken);
-1. stream - 文件流
-2. options - 配置选项
-3. sheetIndex - 表格位置索引，起始值为0
-  
-Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken);
-1. stream - 文件流
-2. options - 配置选项
-3. sheetName - 表格名称，不指定取第一个
 ```
+> 1. file - 文件路径
+> 2. options - 配置选项
+> 3. sheetIndex - 表格位置索引，起始值为0
+
+```csharp
+Task<DataTable> ReadToDataTableAsync(string file, SheetReadOptions options, string sheetName, CancellationToken cancellationToken);
+```
+> 1. file - 文件路径
+> 2. options - 配置选项
+> 3. sheetName - 表格名称，不指定取第一个
+```csharp
+Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken);
+```
+> 1. stream - 文件流
+> 2. options - 配置选项
+> 3. sheetIndex - 表格位置索引，起始值为0
+```csharp
+Task<DataTable> ReadToDataTableAsync(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken);
+```
+> 1. stream - 文件流
+> 2. options - 配置选项
+> 3. sheetName - 表格名称，不指定取第一个
 
 #### 读取表格内容到对象集合
 ```csharp
 Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken);
-1. file - 文件路径
-2. options - 配置选项
-3. sheetIndex - 表格位置索引，起始值为0
-4. T - 结果对象类型，必须是类且包含公开的无参构造器
-
-Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, string sheetName, CancellationToken cancellationToken);
-1. file - 文件路径
-2. options - 配置选项
-3. sheetName - 表格名称，不指定取第一个
-4. T - 结果对象类型，必须是类且包含公开的无参构造器
-
-Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken);
-1. stream - 文件流
-2. options - 配置选项
-3. sheetIndex - 表格位置索引，起始值为0
-4. T - 结果对象类型，必须是类且包含公开的无参构造器
-
-Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken);
-1. stream - 文件流
-2. options - 配置选项
-3. sheetName - 表格名称，不指定取第一个
-4. T - 结果对象类型，必须是类且包含公开的无参构造器
 ```
+> 1. file - 文件路径
+> 2. options - 配置选项
+> 3. sheetIndex - 表格位置索引，起始值为0
+> 4. T - 结果对象类型，必须是类且包含公开的无参构造器
+
+```csharp
+Task<List<T>> ReadToListAsync<T>(string file, SheetReadOptions options, string sheetName, CancellationToken cancellationToken);
+```
+> 1. file - 文件路径
+> 2. options - 配置选项
+> 3. sheetName - 表格名称，不指定取第一个
+> 4. T - 结果对象类型，必须是类且包含公开的无参构造器
+
+```csharp
+Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, int sheetIndex, CancellationToken cancellationToken);
+```
+> 1. stream - 文件流
+> 2. options - 配置选项
+> 3. sheetIndex - 表格位置索引，起始值为0
+> 4. T - 结果对象类型，必须是类且包含公开的无参构造器
+
+```csharp
+Task<List<T>> ReadToListAsync<T>(Stream stream, SheetReadOptions options, string sheetName, CancellationToken cancellationToken);
+```
+> 1. stream - 文件流
+> 2. options - 配置选项
+> 3. sheetName - 表格名称，不指定取第一个
+> 4. T - 结果对象类型，必须是类且包含公开的无参构造器
 
 #### 读取指定单列数据到集合
-``` csharp
+```csharp
 Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, int sheetIndex, Func<object, CultureInfo, T> valueConvert, CancellationToken cancellationToken);
-1. file - 文件路径
-2. firstRowNumber - 起始行号，从1开始
-3. columnNumber - 列号，起始值为1
-4. sheetIndex - 表格位置索引，起始值为0
-5. valueConvert - 值转换方法
-
-Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert, CancellationToken cancellationToken);
-1. file - 文件路径
-2. firstRowNumber - 起始行号，起始值为1
-3. columnNumber - 列号，起始值为1
-4. sheetName - 表格名称，不指定取第一个
-5. valueConvert - 值转换方法
-
-Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object,  CultureInfo, T> valueConvert, CancellationToken cancellationToken);
-1. stream - 文件流
-2. firstRowNumber - 起始行号，起始值为1
-3. columnNumber - 列号，起始值为1
-4. sheetIndex - 表格位置索引，起始值为0
-5. valueConvert - 值转换方法
-
-Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert, CancellationToken cancellationToken);
-1. stream - 文件流
-2. firstRowNumber - 起始行号，起始值为1
-3. columnNumber - 列号，起始值为1
-4. sheetName - 表格名称，不指定取第一个
-5. valueConvert - 值转换方法
 ```
-    
+> 1. file - 文件路径
+> 2. firstRowNumber - 起始行号，从1开始
+> 3. columnNumber - 列号，起始值为1
+> 4. sheetIndex - 表格位置索引，起始值为0
+> 5. valueConvert - 值转换方法
+
+```csharp
+Task<List<T>> ReadToListAsync<T>(string file, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert, CancellationToken cancellationToken);
+```
+> 1. file - 文件路径
+> 2. firstRowNumber - 起始行号，起始值为1
+> 3. columnNumber - 列号，起始值为1
+> 4. sheetName - 表格名称，不指定取第一个
+> 5. valueConvert - 值转换方法
+
+```csharp
+Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, int sheetIndex, Func<object,  CultureInfo, T> valueConvert, CancellationToken cancellationToken);
+```
+> 1. stream - 文件流
+> 2. firstRowNumber - 起始行号，起始值为1
+> 3. columnNumber - 列号，起始值为1
+> 4. sheetIndex - 表格位置索引，起始值为0
+> 5. valueConvert - 值转换方法
+
+```csharp
+Task<List<T>> ReadToListAsync<T>(Stream stream, int firstRowNumber, int columnNumber, string sheetName, Func<object, CultureInfo, T> valueConvert, CancellationToken cancellationToken);
+```
+> 1. stream - 文件流
+> 2. firstRowNumber - 起始行号，起始值为1
+> 3. columnNumber - 列号，起始值为1
+> 4. sheetName - 表格名称，不指定取第一个
+> 5. valueConvert - 值转换方法
+
+## 协议
+
+本项目采用 Apache-2.0 协议，可查看 [LICENSE](https://github.com/realzhaorong/Powersheet/blob/master/LICENSE) 了解更详细内容。
+
+## 联系我们
+
+如果您需要向我们反馈 Bug、提供产品意见，可以创建一个 [Github issue](https://github.com/realzhaorong/Powersheet/issues) 联系我们，非常感谢！
+
+---
+
+[![JetBrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/)
+
+Thanks to [JetBrains](https://www.jetbrains.com/) for supporting the project through [All Products Packs](https://www.jetbrains.com/products.html) within their [Free Open Source License](https://www.jetbrains.com/community/opensource) program.
+
+---
 ![Alt](https://repobeats.axiom.co/api/embed/eff3327d99d2da5a87ff59600720befd793cff06.svg "Repobeats analytics image")
